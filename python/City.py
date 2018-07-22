@@ -1,5 +1,7 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import time
+from utils import calculate_journey_distance
 
 
 class Route:
@@ -44,23 +46,26 @@ def run_tests(debug=False):
     grid_size = 10
     number_of_cities = 3
     shape = (number_of_cities, 2)
-    cities = []
-    for _ in range(number_of_cities):
 
-        city = np.random.choice(
-            grid_size, shape)
-        cities.append(city)
+    cities = np.random.choice(grid_size, shape)
 
-    # create the routes
+    # create the journeys
     number_of_routes = 20
-    routes = []
+    journeys = []
     for _ in range(number_of_routes):
 
-        route = np.random.choice(
+        journey = np.random.choice(
             number_of_cities, number_of_cities, replace=False)
-        routes.append(route)
+        journeys.append(journey)
 
     # calculate the distance and cost
+    distances = []
+    for journey in journeys:
+        distance = calculate_journey_distance(journey, cities, debug=debug)
+
+        # add to distances
+        distances.append(distance)
+    distances = np.asarray(distances)
 
     # timer because it's a long process!!
     print("Leaving",
@@ -69,6 +74,13 @@ def run_tests(debug=False):
           time.time() - start_time)
 
     # and out of here
+
+    #plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
+    # plt.show()
+
+    plt.scatter(cities[:, 0], cities[:, 1])
+    plt.show()
+
     return return_code
 
 
