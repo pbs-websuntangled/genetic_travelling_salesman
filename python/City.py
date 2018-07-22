@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 
-class City:
+class Route:
 
     def __init__(self, x, y):
 
@@ -59,6 +59,8 @@ def run_tests(debug=False):
         route = np.random.choice(
             number_of_cities, number_of_cities, replace=False)
         routes.append(route)
+
+    # calculate the distance and cost
 
     # timer because it's a long process!!
     print("Leaving",
