@@ -2,17 +2,17 @@ import time
 import numpy as np
 
 
-def calculate_journey_distance(journey, cities, debug=False):
+def calculate_rout_distance(route, cities, debug=False):
 
     # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "calculate_journey_distance"
+    start_time, function_name = time.time(), "calculate_rout_distance"
     print("Starting", function_name)
 
     # go through and calculate the distance
     distance = 0
     first_time_through = True
 
-    for city_index in journey:
+    for city_index in route:
 
         # if it's the first city then move to the next
         if first_time_through:
@@ -31,9 +31,9 @@ def calculate_journey_distance(journey, cities, debug=False):
         # accumulate the distance
         distance = distance + distance_step
 
-    # I've done the journey, so go back to the beginning
-    this_city = cities[journey[0]]
-    previous_city = cities[journey[-1]]
+    # I've done the route, so go back to the beginning
+    this_city = cities[route[0]]
+    previous_city = cities[route[-1]]
 
     distance_step_x = this_city[0] - previous_city[0]
     distance_step_y = this_city[1] - previous_city[1]
@@ -65,11 +65,11 @@ def run_tests(debug=False):
     # set up the cities
     cities = [[0, 0], [3, 4], [3, 0]]
 
-    # set up the journey
-    journey = [0, 1, 2]  # should be 12
+    # set up the route
+    route = [0, 1, 2]  # should be 12
 
     # calculate the jorney
-    distance = calculate_journey_distance(journey, cities, debug=False)
+    distance = calculate_rout_distance(route, cities, debug=False)
 
     # did the test work
     if 12 == distance:

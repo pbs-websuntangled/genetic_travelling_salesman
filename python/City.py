@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-from utils import calculate_journey_distance
+from utils import calculate_rout_distance
 
 
 class Route:
@@ -9,7 +9,7 @@ class Route:
     def __init__(self, x, y):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__"
+        start_time, function_name = time.time(), "__init__City"
         print("Starting", function_name)
 
         self.x = x
@@ -49,19 +49,19 @@ def run_tests(debug=False):
 
     cities = np.random.choice(grid_size, shape)
 
-    # create the journeys
+    # create the routes
     number_of_routes = 20
-    journeys = []
+    routes = []
     for _ in range(number_of_routes):
 
-        journey = np.random.choice(
+        route = np.random.choice(
             number_of_cities, number_of_cities, replace=False)
-        journeys.append(journey)
+        routes.append(route)
 
     # calculate the distance and cost
     distances = []
-    for journey in journeys:
-        distance = calculate_journey_distance(journey, cities, debug=debug)
+    for route in routes:
+        distance = calculate_rout_distance(route, cities, debug=debug)
 
         # add to distances
         distances.append(distance)
