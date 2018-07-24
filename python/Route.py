@@ -16,9 +16,18 @@ class Route:
         self.cities = cities
 
         # generate the random route
+        # home city is always 0
         number_of_cities = cities.shape[0]
         self.route = np.random.choice(
             number_of_cities, number_of_cities, replace=False)
+
+        # get the index of the route element where the home city (0) is
+        index_of_zero = np.where(self.route == 0)[0][0]
+
+        # replace the value at that index with the contents of route[0]
+        # and the home city with zero
+        self.route[index_of_zero] = self.route[0]
+        self.route[0] = 0
 
         # calculate the distance
         self.calculate_distance()
@@ -104,6 +113,13 @@ def run_tests(debug=False):
         route = Route(cities)
         routes.append(route)
 
+    if 24.729611 == round(routes[0].distance, 6):
+        print("Test for route distance  - passed")
+        return_code = 0
+    else:
+        print("Test for route distance - failed")
+        return_code = 4
+
     # timer because it's a long process!!
     print("Leaving",
           function_name,
@@ -111,9 +127,6 @@ def run_tests(debug=False):
           time.time() - start_time)
 
     # and out of here
-
-    # plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
-    # plt.show()
 
     plt.scatter(cities[:, 0], cities[:, 1])
     plt.show()

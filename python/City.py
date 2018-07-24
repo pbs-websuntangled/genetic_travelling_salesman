@@ -4,7 +4,7 @@ import time
 from utils import calculate_rout_distance
 
 
-class Route:
+class City:
 
     def __init__(self, x, y):
 
@@ -44,28 +44,19 @@ def run_tests(debug=False):
 
     # create the cities
     grid_size = 10
+    low = 0
     number_of_cities = 3
     shape = (number_of_cities, 2)
 
-    cities = np.random.choice(grid_size, shape)
+    # generate some random cities
+    cities = []
 
-    # create the routes
-    number_of_routes = 20
-    routes = []
-    for _ in range(number_of_routes):
+    for _ in range(number_of_cities):
 
-        route = np.random.choice(
-            number_of_cities, number_of_cities, replace=False)
-        routes.append(route)
+        x = np.random.randint(low, high=grid_size, size=None, dtype='l')
+        y = np.random.randint(low, high=grid_size, size=None, dtype='l')
 
-    # calculate the distance and cost
-    distances = []
-    for route in routes:
-        distance = calculate_rout_distance(route, cities, debug=debug)
-
-        # add to distances
-        distances.append(distance)
-    distances = np.asarray(distances)
+        cities.append(City(x, y))
 
     # timer because it's a long process!!
     print("Leaving",
@@ -75,10 +66,14 @@ def run_tests(debug=False):
 
     # and out of here
 
-    #plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
-    # plt.show()
+    # get data for plotting
+    x = []
+    y = []
+    for city in cities:
+        x.append(city.x)
+        y.append(city.y)
 
-    plt.scatter(cities[:, 0], cities[:, 1])
+    plt.scatter(x, y)
     plt.show()
 
     return return_code
