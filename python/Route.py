@@ -42,23 +42,25 @@ class Route:
     def calculate_distance(self):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__Route"
+        start_time, function_name = time.time(), "calculate_distance"
         print("Starting", function_name)
 
         # go through and calculate the distance
         distance = 0
         first_time_through = True
+        persistent_previous_city_index = 0
 
         for city_index in self.route:
 
             # if it's the first city then move to the next
             if first_time_through:
                 first_time_through = False
+                persistent_previous_city_index = city_index
                 continue
 
             # calculate the distance
             this_city = self.cities[city_index]
-            previous_city = self.cities[city_index - 1]
+            previous_city = self.cities[persistent_previous_city_index]
 
             distance_step_x = this_city[0] - previous_city[0]
             distance_step_y = this_city[1] - previous_city[1]
@@ -67,6 +69,9 @@ class Route:
 
             # accumulate the distance
             distance = distance + distance_step
+
+            # update the pevious city index
+            persistent_previous_city_index = city_index
 
         # I've done the route, so go back to the beginning
         this_city = self.cities[self.route[0]]
@@ -92,7 +97,7 @@ class Route:
     def mutate_route(self, number_of_city_pairs_to_swap):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "kill_weakest_routes"
+        start_time, function_name = time.time(), "mutate_route"
         print("Starting", function_name)
 
         # Randomly swaps n pairs of cities in a copy of the
@@ -118,7 +123,7 @@ class Route:
             copy_of_route.route[city_indices[mutation_index][1]] = swapper
 
         # now recalculate the distance for that mutated route
-        self.calculate_distance()
+        copy_of_route.calculate_distance()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -162,7 +167,16 @@ def run_tests(debug=False):
         return_code = 4
 
     # test route mutation
-    mutated_route = route.mutate_route(3)
+    # 300 should leave it 0,2,1 which is swapped
+    mutated_route = route.mutate_route(300)
+
+    # did the test work?
+    if mutated_route.route[1] != route.route[1]:
+        print("Test for route distance  - passed")
+        return_code = 0
+    else:
+        print("Test for route mutation - failed")
+        return_code = 4
 
     # timer because it's a long process!!
     print("Leaving",

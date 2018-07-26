@@ -190,29 +190,12 @@ class Sales_agent:
             if len(self.routes) < self.number_of_routes:
 
                 # put a copy of this one on the end
-                self.routes.append(copy.deepcopy(self.routes[route_index]))
+                self.routes.append(route.mutate_route(number_of_mutations))
 
             else:
 
                 # I already have the amount of routes that I want so get out
                 return
-
-            # now choose the cities to swap
-            for _ in range(number_of_mutations):
-
-                # get the two city indices
-                city_swap_indices = (np.random.rand(2)) * \
-                    self.number_of_cities
-
-                # temp
-                temp = self.routes[route_index]
-                swapper = self.routes[route_index].route[int(
-                    city_swap_indices[0])]
-                self.routes[route_index].route[int(city_swap_indices[0])
-                                               ] = self.routes[route_index].route[int(city_swap_indices[1])]
-
-                self.routes[route_index].route[int(
-                    city_swap_indices[1])] = swapper
 
             # now recalculate the distance for that mutated route
             self.routes[route_index].calculate_distance()
