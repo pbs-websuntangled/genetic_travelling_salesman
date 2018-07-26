@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 import time
 from utils import calculate_rout_distance
 
@@ -17,9 +18,9 @@ class Route:
 
         # generate the random route
         # home city is always 0
-        number_of_cities = cities.shape[0]
+        self.number_of_cities = cities.shape[0]
         self.route = np.random.choice(
-            number_of_cities, number_of_cities, replace=False)
+            self.number_of_cities, self.number_of_cities, replace=False)
 
         # get the index of the route element where the home city (0) is
         index_of_zero = np.where(self.route == 0)[0][0]
@@ -88,6 +89,46 @@ class Route:
         # and out of here
         self.distance = distance
 
+    def mutate_route(self, number_of_city_pairs_to_swap):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "kill_weakest_routes"
+        print("Starting", function_name)
+
+        # Randomly swaps n pairs of cities in a copy of the
+        # route and returns that copy to the caller
+
+        # so take a copy
+        copy_of_route = copy.deepcopy(self)
+
+        # generate the set of city indices in one hit
+        city_indices = np.random.rand(
+            number_of_city_pairs_to_swap, 2) * (copy_of_route.number_of_cities - 1) + 1  # make sure it's not zero
+        city_indices = city_indices.astype(int)
+
+        # now loop through the mutations and swap the cities
+        for mutation_index in range(number_of_city_pairs_to_swap):
+
+            # temp
+            swapper = copy_of_route.route[city_indices[mutation_index][0]]
+
+            copy_of_route.route[city_indices[mutation_index][0]
+                                ] = copy_of_route.route[city_indices[mutation_index][1]]
+
+            copy_of_route.route[city_indices[mutation_index][1]] = swapper
+
+        # now recalculate the distance for that mutated route
+        self.calculate_distance()
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+        # and out of here
+        return copy_of_route
+
 
 def run_tests(debug=False):
 
@@ -119,6 +160,9 @@ def run_tests(debug=False):
     else:
         print("Test for route distance - failed")
         return_code = 4
+
+    # test route mutation
+    mutated_route = route.mutate_route(3)
 
     # timer because it's a long process!!
     print("Leaving",
