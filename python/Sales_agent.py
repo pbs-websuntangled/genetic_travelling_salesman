@@ -24,7 +24,7 @@ class Sales_agent:
         self.number_of_iterations = number_of_iterations
 
         # how big is my country
-        self.country_size = 10
+        self.country_size = 100
 
         # generate the cities with random co-ordinates
         self.create_cities()
@@ -64,11 +64,18 @@ class Sales_agent:
         start_time, function_name = time.time(), "evolve_routes"
         print("Starting", function_name)
 
+        # create a holder to show progress of distance
+        self.distances = []
+
         # iterate the evolution process
-        for iteration in range(self.number_of_iterations):
+        for self.iteration in range(self.number_of_iterations):
 
             # evaluate this set of routes
             self.evaluate_routes()
+
+            # have I finished?
+            if self.range_of_distances == 0:
+                break
 
             # kill the weakest routes
             self.kill_weakest_routes()
@@ -93,24 +100,33 @@ class Sales_agent:
         # sort the routes
         self.routes.sort(key=lambda x: x.distance, reverse=False)
 
+        # save the best distance
+        self.distances.append(self.routes[0].distance)
+
         # range of distances
-        range_of_distances = self.routes[-1].distance - self.routes[0].distance
+        try:
+            self.range_of_distances = self.routes[-1].distance - \
+                self.routes[0].distance
+        except:
+            you_can_break_here = True
 
-        # store the ranking
-        position = 0
-        for route in self.routes:
+        if self.range_of_distances != 0:
 
-            # save the position
-            route.position = position
+            # store the ranking
+            position = 0
+            for route in self.routes:
 
-            # save the fitness (bigger is better)
-            # the best route has a fitnes of 1
-            # other routes are less
-            route.fitness = 1 - (route.distance -
-                                 self.routes[0].distance) / range_of_distances
+                # save the position
+                route.position = position
 
-            # increment the position
-            position = position + 1
+                # save the fitness (bigger is better)
+                # the best route has a fitnes of 1
+                # other routes are less
+                route.fitness = 1 - (route.distance -
+                                     self.routes[0].distance) / self.range_of_distances
+
+                # increment the position
+                position = position + 1
 
         # timer because it's a long process!!
         print("Leaving",
@@ -135,10 +151,14 @@ class Sales_agent:
 
             # is it fit enough?
             danger = death_tokens[route_index]
-            if danger < route.fitness:
+            if danger <= route.fitness:
 
                 # this route survives!!
                 new_routes.append(self.routes[route_index])
+
+        # have I destroyed all the routes!!
+        if len(new_routes) == 0:
+            you_can_break_here = True
 
         # replace the routes
         self.routes = new_routes
@@ -155,7 +175,7 @@ class Sales_agent:
     def mutate_routes(self):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "kill_weakest_routes"
+        start_time, function_name = time.time(), "mutate_routes"
         print("Starting", function_name)
 
         # creates new routes that are mutations of the existing routes
@@ -168,13 +188,6 @@ class Sales_agent:
         maximum_mutations_per_route = max(2, int(0.1 * self.number_of_cities))
         minimum_mutatations_per_route = 1
 
-        # generate the set of random numbers in one hit
-        death_tokens = np.random.rand(self.number_of_routes)
-
-        # now check fitness against the death token
-        # kill if it's less
-        # by not copying it over to new list
-        new_routes = []
         for route_index, route in enumerate(self.routes):
 
             # first let's choose an amount of mutations
@@ -196,9 +209,6 @@ class Sales_agent:
 
                 # I already have the amount of routes that I want so get out
                 return
-
-            # now recalculate the distance for that mutated route
-            self.routes[route_index].calculate_distance()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -246,11 +256,12 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 7
-    number_of_routes = 20
+    number_of_cities = 70
+    number_of_routes = 1000
     debug = True
+    number_of_iterations = 1000
     sales_agent_1 = Sales_agent(
-        number_of_cities, number_of_routes, number_of_iterations=5, debug=debug)
+        number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
     # timer because it's a long process!!
     print("Leaving",
@@ -263,7 +274,18 @@ def run_tests(debug=False):
     # plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
     # plt.show()
 
+    # plot the cities on the chart
     plt.scatter(sales_agent_1.cities[:, 0], sales_agent_1.cities[:, 1])
+
+    # plot the route on the chart
+    x = []
+    y = []
+    for city_index in sales_agent_1.routes[0].route:
+        x.append(sales_agent_1.cities[city_index][0])
+        y.append(sales_agent_1.cities[city_index][1])
+
+    plt.plot(x, y, color='k', linestyle='-', linewidth=2)
+
     plt.show()
 
     return return_code
