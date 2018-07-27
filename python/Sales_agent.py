@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import os
 import numpy as np
 import time
 import copy
@@ -13,6 +14,9 @@ class Sales_agent:
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "__init__Country"
         print("Starting", function_name)
+
+        # save the start time
+        self.start_time = time.strftime("%Y%m%d-%H%M%S")
 
         # save the number of cities
         self.number_of_cities = number_of_cities
@@ -125,6 +129,9 @@ class Sales_agent:
                 route.fitness = 1 - (route.distance -
                                      self.routes[0].distance) / self.range_of_distances
 
+                # try alternate route fitness
+                route.fitness = 1 - position / self.number_of_routes
+
                 # increment the position
                 position = position + 1
 
@@ -193,11 +200,8 @@ class Sales_agent:
             # first let's choose an amount of mutations
             # there will be a minimum and a maximum with inbetweens a
             # function of the inverse fitness
-            if self.routes[route_index].fitness == 0:
-                number_of_mutations = maximum_mutations_per_route
-            else:
-                number_of_mutations = min(minimum_mutatations_per_route, int(
-                    maximum_mutations_per_route * 1 / self.routes[route_index].fitness))
+            number_of_mutations = int(max(minimum_mutatations_per_route,
+                                          maximum_mutations_per_route * (1 - self.routes[route_index].fitness)))
 
             # create a copy and put it onto the  end of the list
             if len(self.routes) < self.number_of_routes:
@@ -256,10 +260,10 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 70
-    number_of_routes = 1000
+    number_of_cities = 30
+    number_of_routes = 400
     debug = True
-    number_of_iterations = 1000
+    number_of_iterations = 400
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -284,9 +288,31 @@ def run_tests(debug=False):
         x.append(sales_agent_1.cities[city_index][0])
         y.append(sales_agent_1.cities[city_index][1])
 
+    filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
+        "__routes_" + str(sales_agent_1.number_of_routes) + \
+        "__iterations_" + str(sales_agent_1.number_of_routes) +\
+        "__type_route" +\
+        "__ts_" + str(sales_agent_1.start_time)
+
+    plt.figure()
     plt.plot(x, y, color='k', linestyle='-', linewidth=2)
 
-    plt.show()
+    plt.savefig(os.path.join('plots',
+                             filenameToUse + ".png"))
+    plt.close('all')
+
+    filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
+        "__routes_" + str(sales_agent_1.number_of_routes) + \
+        "__iterations_" + str(sales_agent_1.number_of_routes) +\
+        "__type_progress" +\
+        "__ts_" + str(sales_agent_1.start_time)
+
+    plt.figure()
+    plt.plot(sales_agent_1.distances, color='k', linestyle='-', linewidth=2)
+
+    plt.savefig(os.path.join('plots',
+                             filenameToUse + ".png"))
+    plt.close('all')
 
     return return_code
 
