@@ -16,6 +16,12 @@ class Route:
         # save the cities
         self.cities = cities
 
+        # create slot for fitness
+        self.fitness = ""
+
+        # create slot for provenance
+        self.provenance = ""
+
         # generate the random route
         # home city is always 0
         self.number_of_cities = cities.shape[0]
@@ -125,6 +131,9 @@ class Route:
         # now recalculate the distance for that mutated route
         copy_of_route.calculate_distance()
 
+        # update provenace to show it's come from a mutation
+        self.provenance = self.provenance + "Mutation,"
+
         # timer because it's a long process!!
         print("Leaving",
               function_name,
@@ -143,13 +152,76 @@ class Route:
         # Takes segments from the self route and inserts them into
         # a copy of the partner route
 
+        # do all the stuff here about inserting the segments
+
+        # The one with the lowest fitness is the father
+        if self.fitness > partner.fitness:
+            mother = self
+            father = partner
+        else:
+            mother = partner
+            father = self
+
+        # Choose how much of each parent to take based on
+        # fitness of each.
+        fathers_contribution_to_route = father.fitness / \
+            (father.fitness + mother.fitness)
+
         # so take a copy
         child = copy.deepcopy(partner)
 
-        # do all the stuff here about inserting the segments
+        # an array of all the insertions
+        insertions = []
+
+        # calculate how many insertions there will be
+        number_of_insertions = int(
+            fathers_contribution_to_route * self.number_of_cities)
+
+        # create a np array of the indices to use (or cities??)
+        # cities i think
+        # it contains an array of the first cities in the sequence of two
+        # cities from the fathers sequence to be inserted
+        # into the mother's sequence
+        insertions = np.random.choice(
+            self.number_of_cities, number_of_insertions, replace=False)
+
+        # get the indices of values in the fathers route that are in the insertions
+        indices_of_insertions_from_father = np.isin(father.route, insertions)
+
+        # get the indices of values in the mothers route that are in the insertions
+        indices_of_insertions_from_mother = np.isin(father.route, insertions)
+
+        # an array to hold the offspring route
+        new_route = []
+
+        for route_index in range(self.number_of_cities):
+
+            # see if this element in the mothers route is to be replaced
+            if indices_of_insertions_from_mother[route_index] == True:
+
+                # the element to be replaced
+                element_to_be_replaced = mother.route[route_index]
+
+                # get the index of this element in the fathers route
+                index_of_insertion_from_father = np.where(
+                    father.route == element_to_be_replaced)
+
+                # if the index is for the last item, put all the rest from the mother
+                # into the child, then add this onto the end
+                if index_of_insertion_from_father == self.number_of_cities - 1:
+
+                    # check the item has not already been added
+                    if element_to_be_replaced is not in new_route:
+                        new_route.append(element_to_be_replaced)
+
+                # put the insertion in
+                # new_route.append()
 
         # now recalculate the distance for that child route
         child.calculate_distance()
+
+        # update provenace to show it's come from a mutation
+        child.provenance = mother.provenance + "Child,"
 
         # timer because it's a long process!!
         print("Leaving",
@@ -206,6 +278,8 @@ def run_tests(debug=False):
 
     # test the route procreation
     partner = Route(cities)
+    partner.fitness = 0.34
+    route.fitness = 0.66
     child = route.procreate_route(partner)
 
     # timer because it's a long process!!
