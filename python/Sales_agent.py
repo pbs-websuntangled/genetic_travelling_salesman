@@ -263,7 +263,8 @@ def run_tests(debug=False):
     number_of_cities = 30
     number_of_routes = 400
     debug = True
-    number_of_iterations = 4000
+    number_of_iterations = 550
+    number_of_iterations = 50
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -277,9 +278,6 @@ def run_tests(debug=False):
 
     # plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
     # plt.show()
-
-    # plot the cities on the chart
-    plt.scatter(sales_agent_1.cities[:, 0], sales_agent_1.cities[:, 1])
 
     # plot the route on the chart
     x = []
@@ -295,6 +293,10 @@ def run_tests(debug=False):
         "__ts_" + str(sales_agent_1.start_time)
 
     plt.figure()
+
+    # plot the cities on the chart
+    plt.scatter(sales_agent_1.cities[:, 0],
+                sales_agent_1.cities[:, 1], c="red", s=500)
     plt.plot(x, y, color='k', linestyle='-', linewidth=2)
 
     plt.savefig(os.path.join('plots',

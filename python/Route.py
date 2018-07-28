@@ -216,7 +216,7 @@ def run_tests(debug=False):
 
     # and out of here
 
-    plt.scatter(cities[:, 0], cities[:, 1])
+    plt.scatter(cities[:, 0], cities[:, 1], c="red", s=100)
     plt.show()
 
     return return_code
