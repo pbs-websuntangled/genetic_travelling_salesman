@@ -134,6 +134,32 @@ class Route:
         # and out of here
         return copy_of_route
 
+    def procreate_route(self, partner):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "procreate_routes"
+        print("Starting", function_name)
+
+        # Takes segments from the self route and inserts them into
+        # a copy of the partner route
+
+        # so take a copy
+        child = copy.deepcopy(partner)
+
+        # do all the stuff here about inserting the segments
+
+        # now recalculate the distance for that child route
+        child.calculate_distance()
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+        # and out of here
+        return child
+
 
 def run_tests(debug=False):
 
@@ -177,6 +203,10 @@ def run_tests(debug=False):
     else:
         print("Test for route mutation - failed")
         return_code = 4
+
+    # test the route procreation
+    partner = Route(cities)
+    child = route.procreate_route(partner)
 
     # timer because it's a long process!!
     print("Leaving",

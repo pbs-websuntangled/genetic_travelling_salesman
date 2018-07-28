@@ -263,7 +263,7 @@ def run_tests(debug=False):
     number_of_cities = 30
     number_of_routes = 400
     debug = True
-    number_of_iterations = 400
+    number_of_iterations = 4000
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -290,7 +290,7 @@ def run_tests(debug=False):
 
     filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
         "__routes_" + str(sales_agent_1.number_of_routes) + \
-        "__iterations_" + str(sales_agent_1.number_of_routes) +\
+        "__iterations_" + str(sales_agent_1.number_of_iterations) +\
         "__type_route" +\
         "__ts_" + str(sales_agent_1.start_time)
 
