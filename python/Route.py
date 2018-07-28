@@ -210,12 +210,27 @@ class Route:
                 # into the child, then add this onto the end
                 if index_of_insertion_from_father == self.number_of_cities - 1:
 
-                    # check the item has not already been added
-                    if element_to_be_replaced is not in new_route:
-                        new_route.append(element_to_be_replaced)
+                    for index in range(route_index + 1, self.number_of_cities):
 
-                # put the insertion in
-                # new_route.append()
+                        # check the item has not already been added
+                        if element_to_be_replaced not in new_route:
+
+                            # it's not already there so add it at the end
+                            new_route.append(mother.route[index])
+
+                    # all added from mother so now add the last city from the father
+                    new_route.append(element_to_be_replaced)
+
+                    # so finish the loop
+                    break
+
+                else:
+                    # it has to be inserted from the father and
+                    # it's not the last element
+                    # so add this one and the next from the father
+                    new_route.append(element_to_be_replaced)
+                    element_to_be_replaced = father.route[index_of_insertion_from_father[0] + 1]
+                    new_route.append(element_to_be_replaced)
 
         # now recalculate the distance for that child route
         child.calculate_distance()
