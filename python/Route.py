@@ -176,7 +176,7 @@ class Route:
         # contain the 1st or 2nd element of the fathers
         # skip if it's in the fathers planned insertions
         # and skip if it's already there
-        dump_it = 1/0
+        # dump_it = 1/0
 
         # an array of all the insertions
         insertions = []
@@ -194,51 +194,76 @@ class Route:
             self.number_of_cities, number_of_insertions, replace=False)
 
         # get the indices of values in the fathers route that are in the insertions
-        indices_of_insertions_from_father = np.isin(father.route, insertions)
+        indices_of_insertions_from_father_first = np.isin(
+            father.route, insertions)
+
+        # create a copy of shifted indices by using roll
+        shifted_indices_of_insertions_from_father = np.roll(
+            indices_of_insertions_from_father_first, 1)
+
+        # now add the dhifted and unshifted together to give me a map of all
+        # the elements in the fathers that are to be replaces
+        t = indices_of_insertions_from_father_first + \
+            shifted_indices_of_insertions_from_father
+
+        cities_to_be_replaced_all = father.route[t]
+        cities_to_be_replaced_first = father.route[indices_of_insertions_from_father_first]
 
         # get the indices of values in the mothers route that are in the insertions
-        indices_of_insertions_from_mother = np.isin(mother.route, insertions)
+        # these must not be transferred over from the mother
+        indices_of_insertions_from_mother = np.isin(
+            mother.route, cities_to_be_replaced_all)
 
         # an array to hold the offspring route
-        new_route = []
+        new_route = [0]  # the first city is always 0
 
         for route_index in range(self.number_of_cities):
+
+            # skip over the first as it's already there
+            # yes, it's inefficvient, optimise later
+            if route_index == 0:
+                continue
 
             # the element to be replaced
             element_to_be_replaced = mother.route[route_index]
 
             # see if this element in the mothers route is to be replaced
+            # correct but needs to have truth for both elements, not just first
             if indices_of_insertions_from_mother[route_index] == True:
 
-                # get the index of this element in the fathers route
-                index_of_insertion_from_father = np.where(
-                    father.route == element_to_be_replaced)[0][0]
+                # only transfer from the fathers route if it's the first
+                # one of the pair
+                if element_to_be_replaced in cities_to_be_replaced_first:
 
-                # if the index is for the last item, put all the rest from the mother
-                # into the child, then add this onto the end
-                if index_of_insertion_from_father == self.number_of_cities - 1:
+                    # get the index of this element in the fathers route
+                    index_of_insertion_from_father = np.where(
+                        father.route == element_to_be_replaced)[0][0]
 
-                    for index in range(route_index + 1, self.number_of_cities):
+                    # if the index is for the last item, put all the rest from the mother
+                    # into the child, then add this onto the end
+                    if index_of_insertion_from_father == self.number_of_cities - 1:
 
-                        # check the item has not already been added
-                        if element_to_be_replaced not in new_route:
+                        for index in range(route_index + 1, self.number_of_cities):
 
-                            # it's not already there so add it at the end
-                            new_route.append(mother.route[index])
+                            # check the item has not already been added
+                            if mother.route[index] not in new_route:
 
-                    # all added from mother so now add the last city from the father
-                    new_route.append(element_to_be_replaced)
+                                # it's not already there so add it at the end
+                                new_route.append(mother.route[index])
 
-                    # so finish the loop
-                    break
+                        # all added from mother so now add the last city from the father
+                        new_route.append(element_to_be_replaced)
 
-                else:
-                    # it has to be inserted from the father and
-                    # it's not the last element
-                    # so add this one and the next from the father
-                    new_route.append(element_to_be_replaced)
-                    element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
-                    new_route.append(element_to_be_replaced)
+                        # so finish the loop
+                        break
+
+                    else:
+                        # it has to be inserted from the father and
+                        # it's not the last element
+                        # so add this one and the next from the father
+                        new_route.append(element_to_be_replaced)
+                        element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
+                        new_route.append(element_to_be_replaced)
             else:
 
                 # This city in the route from the mother is not in the list

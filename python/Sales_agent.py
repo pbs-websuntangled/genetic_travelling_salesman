@@ -82,11 +82,28 @@ class Sales_agent:
                 break
 
             # kill the weakest routes
-            self.kill_weakest_routes()
+            number_killed = self.kill_weakest_routes()
+            self.number_survived = self.number_of_routes - number_killed
 
             # create offspring
+            #
+            # how many children required?
+            self.number_of_children = int(self.number_survived / 2) - 1
 
-            # mutate the routes
+            # randomly choose parents from the fittest survivors
+            parents = np.random.choice(
+                self.number_of_children * 2, self.number_survived, replace=False)
+
+            for child_index in range(self.number_of_children):
+                parent_1 = self.routes[parents[child_index * 2]]
+                parent_2 = self.routes[parents[child_index * 2 + 1]]
+
+                # now create the child and add it to the routes
+                child_route = parent_1.procreate_route(parent_2)
+                self.routes.append(child_route)
+
+            # mutate the routes to make up the numbers required for the
+            # proper population
             self.mutate_routes()
 
         # timer because it's a long process!!
@@ -170,6 +187,9 @@ class Sales_agent:
         # replace the routes
         self.routes = new_routes
 
+        # how many did I kill?
+        number_of_routes_killed = self.number_of_routes - len(new_routes)
+
         # timer because it's a long process!!
         print("Leaving",
               function_name,
@@ -177,7 +197,7 @@ class Sales_agent:
               time.time() - start_time)
 
         # and out of here
-        return
+        return number_of_routes_killed
 
     def mutate_routes(self):
 
@@ -195,7 +215,16 @@ class Sales_agent:
         maximum_mutations_per_route = max(2, int(0.1 * self.number_of_cities))
         minimum_mutatations_per_route = 1
 
-        for route_index, route in enumerate(self.routes):
+        # generate the random route indices to mutate to get to the correct number of routes
+        # using only the routes that survived
+        self.number_of_mutations = self.number_of_routes - \
+            self.number_survived - self.number_of_children
+        indices_to_mutate = np.random.choice(
+            self.number_survived, self.number_of_mutations)
+
+        for route_index in indices_to_mutate:
+
+            route = self.routes[route_index]
 
             # first let's choose an amount of mutations
             # there will be a minimum and a maximum with inbetweens a
