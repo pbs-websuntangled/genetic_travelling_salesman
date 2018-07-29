@@ -182,8 +182,8 @@ class Route:
         insertions = []
 
         # calculate how many insertions there will be
-        number_of_insertions = int(
-            fathers_contribution_to_route * self.number_of_cities)
+        number_of_insertions = int(0.5 *
+                                   fathers_contribution_to_route * self.number_of_cities)
 
         # create a np array of the indices to use (or cities??)
         # cities i think
@@ -217,15 +217,17 @@ class Route:
         # an array to hold the offspring route
         new_route = [0]  # the first city is always 0
 
-        for route_index in range(self.number_of_cities):
+        for route_index in range(self.number_of_cities - 1):
 
             # skip over the first as it's already there
             # yes, it's inefficvient, optimise later
             if route_index == 0:
                 continue
 
-            # the element to be replaced
-            element_to_be_replaced = mother.route[route_index]
+            try:
+                element_to_be_replaced = mother.route[route_index]
+            except:
+                you_can_break_here = True
 
             # see if this element in the mothers route is to be replaced
             # correct but needs to have truth for both elements, not just first
@@ -280,6 +282,10 @@ class Route:
 
         # update provenace to show it's come from a mutation
         child.provenance = mother.provenance + "Child,"
+
+        # allow break if it's not correct length
+        if child.route.shape[0] != self.number_of_cities - 1:
+            you_can_break_here = true
 
         # timer because it's a long process!!
         print("Leaving",
