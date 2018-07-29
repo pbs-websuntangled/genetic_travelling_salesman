@@ -91,8 +91,8 @@ class Sales_agent:
             self.number_of_children = int(self.number_survived / 2) - 1
 
             # randomly choose parents from the fittest survivors
-            parents = np.random.choice(self.number_survived, self.number_of_children* 2 ,
-                 replace=False)
+            parents = np.random.choice(self.number_survived, self.number_of_children * 2,
+                                       replace=False)
 
             for child_index in range(self.number_of_children):
                 parent_1 = self.routes[parents[child_index * 2]]

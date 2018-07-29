@@ -171,12 +171,9 @@ class Route:
         child = copy.deepcopy(mother)
 
         # the logic here is insufficient
-        # i need both elements of the insertions from the father, not just the first city
-        # then i need to check the mothers route elememt by elemnt to check that it doen't
-        # contain the 1st or 2nd element of the fathers
-        # skip if it's in the fathers planned insertions
-        # and skip if it's already there
-        # dump_it = 1/0
+        # If there are two inswrtion pairs like this 4,7   and 7,8
+        # and in the mothers route it hits the 4, then it will correctly
+        # put the 7 after it but then not look to see if that is something that should be replaced
 
         # an array of all the insertions
         insertions = []
@@ -243,7 +240,7 @@ class Route:
 
                     # if the index is for the last item, put all the rest from the mother
                     # into the child, then add this onto the end
-                    if index_of_insertion_from_father == self.number_of_cities - 1:
+                    if (index_of_insertion_from_father == self.number_of_cities - 1) or (index_of_insertion_from_father == self.number_of_cities - 2):
 
                         for index in range(route_index + 1, self.number_of_cities):
 
@@ -253,8 +250,21 @@ class Route:
                                 # it's not already there so add it at the end
                                 new_route.append(mother.route[index])
 
-                        # all added from mother so now add the last city from the father
-                        new_route.append(element_to_be_replaced)
+                        # so, was it the last, or one from last?
+                        if (index_of_insertion_from_father == self.number_of_cities - 1):
+
+                            if element_to_be_replaced not in new_route:
+                                # all added from mother so now add the last city from the father
+                                new_route.append(element_to_be_replaced)
+                        else:
+
+                            # all added from mother so now add the last city from the father
+                            if element_to_be_replaced not in new_route:
+                                new_route.append(element_to_be_replaced)
+
+                            # now the last one
+                            if father.route[-1] not in new_route:
+                                new_route.append(father.route[-1])
 
                         # so finish the loop
                         break
@@ -263,9 +273,37 @@ class Route:
                         # it has to be inserted from the father and
                         # it's not the last element
                         # so add this one and the next from the father
-                        new_route.append(element_to_be_replaced)
+                        if element_to_be_replaced not in new_route:
+                            new_route.append(element_to_be_replaced)
                         element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
-                        new_route.append(element_to_be_replaced)
+                        if element_to_be_replaced not in new_route:
+                            new_route.append(element_to_be_replaced)
+
+                        # while the last element of the new route is in the first set,
+                        # add the second one
+                        while new_route[-1] in cities_to_be_replaced_first:
+
+                            # it's possible to land here if the last city in the father
+                            # route is due to be inserted
+                            # test fo that
+                            if new_route[-1] == father.route[-1]:
+                                break
+
+                            # find where in the father it comes from and add the next one needed
+                            # get the index of this element in the fathers route
+                            index_of_insertion_from_father = np.where(
+                                father.route == new_route[-1])[0][0]
+
+                            # now get the city that is next to that in the fathers
+                            # route and add it to the new route
+                            try:
+                                element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
+                            except:
+                                you_can_break_here = True
+
+                            if element_to_be_replaced not in new_route:
+                                new_route.append(element_to_be_replaced)
+
             else:
 
                 # This city in the route from the mother is not in the list
@@ -284,8 +322,8 @@ class Route:
         child.provenance = mother.provenance + "Child,"
 
         # allow break if it's not correct length
-        if child.route.shape[0] != self.number_of_cities - 1:
-            you_can_break_here = true
+        if child.route.shape[0] != self.number_of_cities:
+            you_can_break_here = True
 
         # timer because it's a long process!!
         print("Leaving",

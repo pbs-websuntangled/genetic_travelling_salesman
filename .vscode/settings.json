@@ -1,7 +1,7 @@
 {
-    "python.pythonPath": "C:\\Users\\Server01\\Anaconda3\\python.exe",
+    "python.pythonPath": "C:\\Users\\peter\\Anaconda3\\envs\\openCV\\python.exe",
     "python.linting.flake8Enabled": false,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     "python.linting.pep8Enabled": false,
     "python.linting.enabled": true,
     "editor.formatOnSave": true
