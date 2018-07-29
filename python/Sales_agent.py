@@ -85,22 +85,11 @@ class Sales_agent:
             number_killed = self.kill_weakest_routes()
             self.number_survived = self.number_of_routes - number_killed
 
-            # create offspring
-            #
-            # how many children required?
-            self.number_of_children = int(self.number_survived / 2) - 1
-
-            # randomly choose parents from the fittest survivors
-            parents = np.random.choice(self.number_survived, self.number_of_children * 2,
-                                       replace=False)
-
-            for child_index in range(self.number_of_children):
-                parent_1 = self.routes[parents[child_index * 2]]
-                parent_2 = self.routes[parents[child_index * 2 + 1]]
-
-                # now create the child and add it to the routes
-                child_route = parent_1.procreate_route(parent_2)
-                self.routes.append(child_route)
+            # do procreation
+            self.number_of_children = 0
+            do_this = False
+            if do_this == True:
+                self.procreate_routes()
 
             # mutate the routes to make up the numbers required for the
             # proper population
@@ -252,6 +241,35 @@ class Sales_agent:
         # and out of here
         return
 
+    def procreate_routes(self):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "create_routes"
+        print("Starting", function_name)
+
+        # create offspring
+        #
+        # how many children required?
+        self.number_of_children = int(self.number_survived / 2) - 1
+
+        # randomly choose parents from the fittest survivors
+        parents = np.random.choice(self.number_survived, self.number_of_children * 2,
+                                   replace=False)
+
+        for child_index in range(self.number_of_children):
+            parent_1 = self.routes[parents[child_index * 2]]
+            parent_2 = self.routes[parents[child_index * 2 + 1]]
+
+            # now create the child and add it to the routes
+            child_route = parent_1.procreate_route(parent_2)
+            self.routes.append(child_route)
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
     def create_routes(self):
 
         # start a timer because it's a long process!!
@@ -289,7 +307,7 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 30
+    number_of_cities = 10
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
@@ -334,7 +352,7 @@ def run_tests(debug=False):
 
     filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
         "__routes_" + str(sales_agent_1.number_of_routes) + \
-        "__iterations_" + str(sales_agent_1.number_of_routes) +\
+        "__iterations_" + str(sales_agent_1.number_of_iterations) +\
         "__type_progress" +\
         "__ts_" + str(sales_agent_1.start_time)
 

@@ -184,27 +184,28 @@ class Route:
 
         # create a np array of the indices to use (or cities??)
         # cities i think
-        # it contains an array of the first cities in the sequence of two
+        # it contains an array of the 1st cities in the sequence of two
         # cities from the fathers sequence to be inserted
         # into the mother's sequence
         insertions = np.random.choice(
             self.number_of_cities, number_of_insertions, replace=False)
 
         # get the indices of values in the fathers route that are in the insertions
-        indices_of_insertions_from_father_first = np.isin(
+        indices_of_insertions_from_father_1st = np.isin(
             father.route, insertions)
 
         # create a copy of shifted indices by using roll
-        shifted_indices_of_insertions_from_father = np.roll(
-            indices_of_insertions_from_father_first, 1)
+        indices_of_insertions_from_father_2nd = np.roll(
+            indices_of_insertions_from_father_1st, 1)
 
         # now add the dhifted and unshifted together to give me a map of all
         # the elements in the fathers that are to be replaces
-        t = indices_of_insertions_from_father_first + \
-            shifted_indices_of_insertions_from_father
+        t = indices_of_insertions_from_father_1st + \
+            indices_of_insertions_from_father_2nd
 
         cities_to_be_replaced_all = father.route[t]
-        cities_to_be_replaced_first = father.route[indices_of_insertions_from_father_first]
+        cities_to_be_replaced_1st = father.route[indices_of_insertions_from_father_1st]
+        cities_to_be_replaced_2nd = father.route[indices_of_insertions_from_father_2nd]
 
         # get the indices of values in the mothers route that are in the insertions
         # these must not be transferred over from the mother
@@ -232,7 +233,7 @@ class Route:
 
                 # only transfer from the fathers route if it's the first
                 # one of the pair
-                if element_to_be_replaced in cities_to_be_replaced_first:
+                if element_to_be_replaced in cities_to_be_replaced_1st:
 
                     # get the index of this element in the fathers route
                     index_of_insertion_from_father = np.where(
@@ -281,7 +282,7 @@ class Route:
 
                         # while the last element of the new route is in the first set,
                         # add the second one
-                        while new_route[-1] in cities_to_be_replaced_first:
+                        while new_route[-1] in cities_to_be_replaced_1st:
 
                             # it's possible to land here if the last city in the father
                             # route is due to be inserted
