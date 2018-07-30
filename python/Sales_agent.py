@@ -307,7 +307,7 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 30
+    number_of_cities = 50
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
