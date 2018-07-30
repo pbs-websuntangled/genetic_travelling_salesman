@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import scipy.ndimage
 
 
 def calculate_rout_distance(route, cities, debug=False):
@@ -74,8 +75,23 @@ def run_tests(debug=False):
     # did the test work
     if 12 == distance:
         print("The distance test worked")
+
     else:
         print("The distance test did not work")
+
+    # Test finding regions
+    a = np.asarray([1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0])
+    b = np.asarray([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
+
+    regions_1 = scipy.ndimage.label(a)[0]
+
+    regions_2 = scipy.ndimage.find_objects(regions_1)
+
+    regions = []
+
+    for region_slice in regions_2:
+        region = b[region_slice]
+        regions.append(region)
 
     # timer because it's a long process!!
     print("Leaving",

@@ -170,6 +170,193 @@ class Route:
         # so take a copy
         child = copy.deepcopy(mother)
 
+        # an array of all the insertions
+        insertions = []
+
+        # calculate how many insertions there will be
+        number_of_insertions = int(0.5 *
+                                   fathers_contribution_to_route * self.number_of_cities)
+
+        # create a np array of the indices to use (or cities??)
+        # cities i think
+        # it contains an array of the 1st cities in the sequence of two
+        # cities from the fathers sequence to be inserted
+        # into the mother's sequence
+        insertions = np.random.choice(
+            self.number_of_cities, number_of_insertions, replace=False)
+
+        # get the indices of values in the fathers route that are in the insertions
+        indices_of_insertions_from_father_1st = np.isin(
+            father.route, insertions)
+
+        # create a copy of shifted indices by using roll
+        indices_of_insertions_from_father_2nd = np.roll(
+            indices_of_insertions_from_father_1st, 1)
+
+        # now add the dhifted and unshifted together to give me a map of all
+        # the elements in the fathers that are to be replaces
+        t = indices_of_insertions_from_father_1st + \
+            indices_of_insertions_from_father_2nd
+
+        cities_to_be_replaced_all = father.route[t]
+        cities_to_be_replaced_1st = father.route[indices_of_insertions_from_father_1st]
+        cities_to_be_replaced_2nd = father.route[indices_of_insertions_from_father_2nd]
+
+        # get the indices of values in the mothers route that are in the insertions
+        # these must not be transferred over from the mother
+        indices_of_insertions_from_mother = np.isin(
+            mother.route, cities_to_be_replaced_all)
+
+        # an array to hold the offspring route
+        new_route = [0]  # the first city is always 0
+
+        for route_index in range(self.number_of_cities - 1):
+
+            # skip over the first as it's already there
+            # yes, it's inefficvient, optimise later
+            if route_index == 0:
+                continue
+
+            try:
+                element_to_be_replaced = mother.route[route_index]
+            except:
+                you_can_break_here = True
+
+            # see if this element in the mothers route is to be replaced
+            # correct but needs to have truth for both elements, not just first
+            if indices_of_insertions_from_mother[route_index] == True:
+
+                # only transfer from the fathers route if it's the first
+                # one of the pair
+                if element_to_be_replaced in cities_to_be_replaced_1st:
+
+                    # get the index of this element in the fathers route
+                    index_of_insertion_from_father = np.where(
+                        father.route == element_to_be_replaced)[0][0]
+
+                    # if the index is for the last item, put all the rest from the mother
+                    # into the child, then add this onto the end
+                    if (index_of_insertion_from_father == self.number_of_cities - 1) or (index_of_insertion_from_father == self.number_of_cities - 2):
+
+                        for index in range(route_index + 1, self.number_of_cities):
+
+                            # check the item has not already been added
+                            if mother.route[index] not in new_route:
+
+                                # it's not already there so add it at the end
+                                new_route.append(mother.route[index])
+
+                        # so, was it the last, or one from last?
+                        if (index_of_insertion_from_father == self.number_of_cities - 1):
+
+                            if element_to_be_replaced not in new_route:
+                                # all added from mother so now add the last city from the father
+                                new_route.append(element_to_be_replaced)
+                        else:
+
+                            # all added from mother so now add the last city from the father
+                            if element_to_be_replaced not in new_route:
+                                new_route.append(element_to_be_replaced)
+
+                            # now the last one
+                            if father.route[-1] not in new_route:
+                                new_route.append(father.route[-1])
+
+                        # so finish the loop
+                        break
+
+                    else:
+                        # it has to be inserted from the father and
+                        # it's not the last element
+                        # so add this one and the next from the father
+                        if element_to_be_replaced not in new_route:
+                            new_route.append(element_to_be_replaced)
+                        element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
+                        if element_to_be_replaced not in new_route:
+                            new_route.append(element_to_be_replaced)
+
+                        # while the last element of the new route is in the first set,
+                        # add the second one
+                        while new_route[-1] in cities_to_be_replaced_1st:
+
+                            # it's possible to land here if the last city in the father
+                            # route is due to be inserted
+                            # test fo that
+                            if new_route[-1] == father.route[-1]:
+                                break
+
+                            # find where in the father it comes from and add the next one needed
+                            # get the index of this element in the fathers route
+                            index_of_insertion_from_father = np.where(
+                                father.route == new_route[-1])[0][0]
+
+                            # now get the city that is next to that in the fathers
+                            # route and add it to the new route
+                            try:
+                                element_to_be_replaced = father.route[index_of_insertion_from_father + 1]
+                            except:
+                                you_can_break_here = True
+
+                            if element_to_be_replaced not in new_route:
+                                new_route.append(element_to_be_replaced)
+
+            else:
+
+                # This city in the route from the mother is not in the list
+                # of insertions so it should be replicated in the child
+                # (as long as it hasn't already been contrinuted by the father)
+                if element_to_be_replaced not in new_route:
+                    new_route.append(element_to_be_replaced)
+
+        # now replace the route in the child
+        child.route = np.asarray(new_route)
+
+        # now recalculate the distance for that child route
+        child.calculate_distance()
+
+        # update provenace to show it's come from a mutation
+        child.provenance = mother.provenance + "Child,"
+
+        # allow break if it's not correct length
+        if child.route.shape[0] != self.number_of_cities:
+            you_can_break_here = True
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+        # and out of here
+        return child
+
+    def procreate_route_old(self, partner):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "procreate_routes"
+        print("Starting", function_name)
+
+        # Takes segments from the self route and inserts them into
+        # a copy of the partner route
+
+        # do all the stuff here about inserting the segments
+
+        # The one with the lowest fitness is the father
+        if self.fitness > partner.fitness:
+            mother = self
+            father = partner
+        else:
+            mother = partner
+            father = self
+
+        # Choose how much of each parent to take based on
+        # fitness of each.
+        fathers_contribution_to_route = father.fitness / \
+            (father.fitness + mother.fitness)
+
+        # so take a copy
+        child = copy.deepcopy(mother)
+
         # the logic here is insufficient
         # If there are two inswrtion pairs like this 4,7   and 7,8
         # and in the mothers route it hits the 4, then it will correctly
