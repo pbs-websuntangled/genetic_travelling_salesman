@@ -87,7 +87,7 @@ class Sales_agent:
 
             # do procreation
             self.number_of_children = 0
-            do_this = False
+            do_this = True
             if do_this == True:
                 self.procreate_routes()
 
@@ -307,11 +307,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 10
+    number_of_cities = 30
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 50
+    number_of_iterations = 500
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
