@@ -79,20 +79,6 @@ def run_tests(debug=False):
     else:
         print("The distance test did not work")
 
-    # Test finding regions
-    a = np.asarray([1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0])
-    b = np.asarray([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
-
-    regions_1 = scipy.ndimage.label(a)[0]
-
-    regions_2 = scipy.ndimage.find_objects(regions_1)
-
-    regions = []
-
-    for region_slice in regions_2:
-        region = b[region_slice]
-        regions.append(region)
-
     # timer because it's a long process!!
     print("Leaving",
           function_name,
@@ -101,6 +87,46 @@ def run_tests(debug=False):
 
     # and out of here
     return return_code
+
+
+# just in here while i was developing it
+def get_procreation_insertions(debug=False):
+
+    # start a timer because it's a long process!!
+    start_time, function_name = time.time(), "run_tests"
+    print("Starting", function_name)
+
+    # Test finding procreation_insertions
+    a = np.asarray([1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0])
+    b = np.asarray([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
+
+    insertion_labels = scipy.ndimage.label(a)[0]
+
+    insertion_slices = scipy.ndimage.find_objects(insertion_labels)
+
+    procreation_insertions = []
+    firsts = []
+
+    for insertion_slice in insertion_slices:
+        insertion = b[insertion_slice].tolist()
+        procreation_insertions.append(insertion)
+
+        first = insertion[0]
+        firsts.append(first)
+
+    procreation_inserted_cities = np.hstack(procreation_insertions).tolist()
+
+    x = 11 in firsts
+    y = 12 in procreation_inserted_cities
+
+    # timer because it's a long process!!
+    print("Leaving",
+          function_name,
+          "and the process took",
+          time.time() - start_time)
+
+    # and out of here
+    return procreation_insertions, procreation_inserted_cities
 
 
 if __name__ == '__main__':
@@ -113,6 +139,9 @@ if __name__ == '__main__':
 
     # do the run_tests
     return_code = run_tests(debug=debug)
+
+    # do the run_tests
+    procreation_insertions = get_procreation_insertions(debug=debug)
 
     # final return code
     print("return_code", return_code)

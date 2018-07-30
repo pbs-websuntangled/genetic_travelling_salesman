@@ -1,3 +1,4 @@
+import scipy.ndimage
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
@@ -143,6 +144,78 @@ class Route:
         # and out of here
         return copy_of_route
 
+    def get_procreation_insertions(self, proportion_of_route_to_use, debug=False):
+
+        # works on the father for procreation
+        # takes the proportion_of_route_to_use and
+        # randomly identifies half that many starting cities
+        # then finds the next city to that
+        # then chains any pairs that are touching or overlapping
+        # returns three lists:
+        #   an array of the chain starting cities
+        #   an array of the chained cities to insert
+        #   an array of all the cities contained anywhere in a chain
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "get_procreation_insertions"
+        print("Starting", function_name)
+
+        # calculate how many insertions there will be
+        number_of_insertions = int(0.5 *
+                                   proportion_of_route_to_use * self.number_of_cities)
+
+        # create a np array of the cities to be used from the father
+        # it contains an array of the 1st cities in the sequence of two
+        # cities from the fathers sequence to be inserted
+        # into the mother's sequence
+        insertions = np.random.choice(
+            self.number_of_cities, number_of_insertions, replace=False)
+
+        # get the indices of values in the fathers route that are in the insertions
+        indices_of_insertions_from_father_1st = np.isin(
+            self.route, insertions)
+
+        # if the last element is true, set it false as it can't
+        # be the 1st element of a pair
+        if indices_of_insertions_from_father_1st[-1] == True:
+            indices_of_insertions_from_father_1st[-1] = False
+
+        # create a copy of shifted indices by using roll
+        indices_of_insertions_from_father_2nd = np.roll(
+            indices_of_insertions_from_father_1st, 1)
+
+        # now add the shifted and unshifted together to give me a map of all
+        # the elements in the fathers that are to be replaces
+        indices_of_insertions_from_father = indices_of_insertions_from_father_1st + \
+            indices_of_insertions_from_father_2nd
+
+        insertion_labels = scipy.ndimage.label(
+            indices_of_insertions_from_father)[0]
+
+        insertion_slices = scipy.ndimage.find_objects(insertion_labels)
+
+        procreation_insertions = []
+        procreation_insertion_firsts = []
+
+        for insertion_slice in insertion_slices:
+            insertion = self.route[insertion_slice].tolist()
+            procreation_insertions.append(insertion)
+
+            first = insertion[0]
+            procreation_insertion_firsts.append(first)
+
+        procreation_inserted_cities = np.hstack(
+            procreation_insertions).tolist()
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+        # and out of here
+        return procreation_insertions, procreation_insertion_firsts, procreation_inserted_cities
+
     def procreate_route(self, partner):
 
         # start a timer because it's a long process!!
@@ -151,8 +224,6 @@ class Route:
 
         # Takes segments from the self route and inserts them into
         # a copy of the partner route
-
-        # do all the stuff here about inserting the segments
 
         # The one with the lowest fitness is the father
         if self.fitness > partner.fitness:
@@ -167,55 +238,25 @@ class Route:
         fathers_contribution_to_route = father.fitness / \
             (father.fitness + mother.fitness)
 
+        # an array of all the insertions
+        insertions = get_procreation_insertions(
+            proportion_of_route_to_use, debug=False)
+
+        procreation_insertions, procreation_insertion_firsts, procreation_inserted_cities = father.get_procreation_insertions(
+            proportion_of_route_to_use)
+
         # so take a copy
         child = copy.deepcopy(mother)
-
-        # an array of all the insertions
-        insertions = []
-
-        # calculate how many insertions there will be
-        number_of_insertions = int(0.5 *
-                                   fathers_contribution_to_route * self.number_of_cities)
-
-        # create a np array of the indices to use (or cities??)
-        # cities i think
-        # it contains an array of the 1st cities in the sequence of two
-        # cities from the fathers sequence to be inserted
-        # into the mother's sequence
-        insertions = np.random.choice(
-            self.number_of_cities, number_of_insertions, replace=False)
-
-        # get the indices of values in the fathers route that are in the insertions
-        indices_of_insertions_from_father_1st = np.isin(
-            father.route, insertions)
-
-        # create a copy of shifted indices by using roll
-        indices_of_insertions_from_father_2nd = np.roll(
-            indices_of_insertions_from_father_1st, 1)
-
-        # now add the dhifted and unshifted together to give me a map of all
-        # the elements in the fathers that are to be replaces
-        t = indices_of_insertions_from_father_1st + \
-            indices_of_insertions_from_father_2nd
-
-        cities_to_be_replaced_all = father.route[t]
-        cities_to_be_replaced_1st = father.route[indices_of_insertions_from_father_1st]
-        cities_to_be_replaced_2nd = father.route[indices_of_insertions_from_father_2nd]
 
         # get the indices of values in the mothers route that are in the insertions
         # these must not be transferred over from the mother
         indices_of_insertions_from_mother = np.isin(
-            mother.route, cities_to_be_replaced_all)
+            mother.route, procreation_inserted_cities)
 
         # an array to hold the offspring route
         new_route = [0]  # the first city is always 0
 
-        for route_index in range(self.number_of_cities - 1):
-
-            # skip over the first as it's already there
-            # yes, it's inefficvient, optimise later
-            if route_index == 0:
-                continue
+        for route_index in range(1, self.number_of_cities - 1):
 
             try:
                 element_to_be_replaced = mother.route[route_index]
@@ -387,10 +428,10 @@ class Route:
 
         # now add the dhifted and unshifted together to give me a map of all
         # the elements in the fathers that are to be replaces
-        t = indices_of_insertions_from_father_1st + \
+        indices_of_insertions_from_father = indices_of_insertions_from_father_1st + \
             indices_of_insertions_from_father_2nd
 
-        cities_to_be_replaced_all = father.route[t]
+        cities_to_be_replaced_all = father.route[indices_of_insertions_from_father]
         cities_to_be_replaced_1st = father.route[indices_of_insertions_from_father_1st]
         cities_to_be_replaced_2nd = father.route[indices_of_insertions_from_father_2nd]
 
@@ -569,7 +610,7 @@ def run_tests(debug=False):
     # test the route procreation
     # create the cities
     grid_size = 100
-    number_of_cities = 6
+    number_of_cities = 20
     number_of_axis = 2  # for generating the coordinates
     shape = (number_of_cities, number_of_axis)
     cities = np.random.choice(grid_size, shape)
@@ -578,6 +619,15 @@ def run_tests(debug=False):
     mother = Route(cities)
     father.fitness = 0.34
     mother.fitness = 0.66
+    proportion_of_route_to_use = father.fitness / \
+        (father.fitness + mother.fitness)
+
+    # temporary over ride
+    proportion_of_route_to_use = 0.9
+
+    procreation_insertions, procreation_insertion_firsts, procreation_inserted_cities = father.get_procreation_insertions(
+        proportion_of_route_to_use)
+
     child = father.procreate_route(mother)
 
     # timer because it's a long process!!
