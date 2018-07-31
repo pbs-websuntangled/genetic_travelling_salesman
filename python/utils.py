@@ -3,6 +3,26 @@ import numpy as np
 import scipy.ndimage
 
 
+def figure_to_numpy(figure):
+    """
+    @brief Convert a Matplotlib figure to a 4D numpy array with RGBA channels and return it
+    @param figure a matplotlib figure
+    @return a numpy 3D array of RGBA values
+    """
+    # draw the renderer
+    figure.canvas.draw()
+
+    # Get the RGBA buffer from the figure
+    width, height = figure.canvas.get_width_height()
+    figure_as_numpy_array = np.fromstring(
+        figure.canvas.tostring_argb(), dtype=np.uint8)
+    figure_as_numpy_array.shape = (width, height, 4)
+
+    # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
+    figure_as_numpy_array = np.roll(figure_as_numpy_array, 3, axis=2)
+    return figure_as_numpy_array
+
+
 def calculate_rout_distance(route, cities, debug=False):
 
     # start a timer because it's a long process!!

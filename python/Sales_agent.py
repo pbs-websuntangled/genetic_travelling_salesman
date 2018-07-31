@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
+import cv2
 import os
 import numpy as np
 import time
 import copy
 from utils import calculate_rout_distance
+from utils import figure_to_numpy
 from Route import Route
 
 
@@ -307,11 +309,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 70
+    number_of_cities = 30
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 5000
+    number_of_iterations = 1
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -368,6 +370,11 @@ def run_tests(debug=False):
 
     plt.savefig(os.path.join('plots',
                              filenameToUse + ".png"))
+
+    # turn the figure into a numpy array
+    figure_as_array = figure_to_numpy(plt.figure())
+
+    # clear out the plot
     plt.close('all')
 
     return return_code
