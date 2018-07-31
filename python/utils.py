@@ -100,6 +100,8 @@ def get_procreation_insertions(debug=False):
     a = np.asarray([1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0])
     b = np.asarray([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
 
+    b = b[::-1]
+
     insertion_labels = scipy.ndimage.label(a)[0]
 
     insertion_slices = scipy.ndimage.find_objects(insertion_labels)

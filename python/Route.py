@@ -237,6 +237,12 @@ class Route:
             mother = partner
             father = self
 
+        # half of the time, reverse the mother
+        # to create more diversity
+        reverser_decider = np.random.rand()
+        if reverser_decider > 0.5:
+            mother.route[1:] = (mother.route[1:])[::-1]
+
         # Choose how much of each parent to take based on
         # fitness of each.
         fathers_contribution_to_route = father.fitness / \

@@ -311,7 +311,7 @@ def run_tests(debug=False):
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 50000
+    number_of_iterations = 5000
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -320,6 +320,9 @@ def run_tests(debug=False):
           function_name,
           "and the process took",
           time.time() - start_time)
+
+    iterations_per_minute = int(
+        number_of_iterations / ((time.time() - start_time) / 60))
 
     # and out of here
 
@@ -336,6 +339,8 @@ def run_tests(debug=False):
     filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
         "__routes_" + str(sales_agent_1.number_of_routes) + \
         "__iterations_" + str(sales_agent_1.number_of_iterations) +\
+        "__distance_" + str(int(sales_agent_1.routes[0].distance)) +\
+        "__ipm_" + str(int(iterations_per_minute)) +\
         "__type_route" +\
         "__ts_" + str(sales_agent_1.start_time)
 
@@ -353,6 +358,8 @@ def run_tests(debug=False):
     filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
         "__routes_" + str(sales_agent_1.number_of_routes) + \
         "__iterations_" + str(sales_agent_1.number_of_iterations) +\
+        "__distance_" + str(int(sales_agent_1.routes[0].distance)) +\
+        "__ipm_" + str(int(iterations_per_minute)) +\
         "__type_progress" +\
         "__ts_" + str(sales_agent_1.start_time)
 
