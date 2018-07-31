@@ -314,7 +314,7 @@ def run_tests(debug=False):
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 1000
+    number_of_iterations = 5
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -329,24 +329,14 @@ def run_tests(debug=False):
 
     # and out of here
 
-    # plt.plot(zip(*[cities[tour[i % 15]] for i in range(16) ])[0], zip(*[cities[tour[i % 15]] for i in range(16) ])[1], 'xb-', );
-    # plt.show()
-
-    # plot the route on the chart
+    # create the x and y coordinates
     x = []
     y = []
     for city_index in sales_agent_1.routes[0].route:
         x.append(sales_agent_1.cities[city_index][0])
         y.append(sales_agent_1.cities[city_index][1])
 
-    filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
-        "__routes_" + str(sales_agent_1.number_of_routes) + \
-        "__iterations_" + str(sales_agent_1.number_of_iterations) +\
-        "__distance_" + str(int(sales_agent_1.routes[0].distance)) +\
-        "__ipm_" + str(int(iterations_per_minute)) +\
-        "__type_route" +\
-        "__ts_" + str(sales_agent_1.start_time)
-
+    # start a figure
     plt.figure()
 
     # plot the cities on the chart
@@ -354,23 +344,25 @@ def run_tests(debug=False):
                 sales_agent_1.cities[:, 1], c="red", s=500)
     plt.plot(x, y, color='k', linestyle='-', linewidth=2)
 
-    plt.savefig(os.path.join('plots',
-                             filenameToUse + ".png"))
-
     # turn the figure into a numpy array
     route_figure_as_array = plt_to_numpy_array(plt)
 
+    # finish that one
     plt.close('all')
 
-    filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
-        "__routes_" + str(sales_agent_1.number_of_routes) + \
-        "__iterations_" + str(sales_agent_1.number_of_iterations) +\
-        "__distance_" + str(int(sales_agent_1.routes[0].distance)) +\
-        "__ipm_" + str(int(iterations_per_minute)) +\
-        "__type_progress" +\
-        "__ts_" + str(sales_agent_1.start_time)
-
+    # start a new figure
     plt.figure()
+
+    # set the axes
+    axes = plt.gca()
+    x_minimum = 0
+    x_maximum = sales_agent_1.number_of_iterations
+    y_minimum = 0
+    y_maximum = sales_agent_1.distances[0]
+    axes.set_xlim([x_minimum, x_maximum])
+    axes.set_ylim([y_minimum, y_maximum])
+
+    # plot the progress
     plt.plot(sales_agent_1.distances, color='k', linestyle='-', linewidth=2)
 
     # turn the figure into a numpy array
@@ -381,10 +373,14 @@ def run_tests(debug=False):
         (progress_figure_as_array, route_figure_as_array))
 
     # save the stacked image
-    # matplotlib.image.imsave('plot_to_save.png', plot_to_save)
-    cv2.imwrite("plot_to_save1.png", plot_to_save)
-    cv2.imwrite("plot_to_save2xxxxxxxxxxxxxxx.png", progress_figure_as_array)
-    cv2.imwrite("plot_to_save3.png", route_figure_as_array)
+    filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
+        "__routes_" + str(sales_agent_1.number_of_routes) + \
+        "__iterations_" + str(sales_agent_1.number_of_iterations) +\
+        "__distance_" + str(int(sales_agent_1.routes[0].distance)) +\
+        "__ipm_" + str(int(iterations_per_minute)) +\
+        "__type_combined" +\
+        "__ts_" + str(sales_agent_1.start_time)
+    cv2.imwrite(os.path.join("plots", filenameToUse, ".png"), plot_to_save)
 
     # clear out the plot
     plt.close('all')
