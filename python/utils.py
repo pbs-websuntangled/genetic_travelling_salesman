@@ -1,6 +1,38 @@
 import time
+import os
+import matplotlib.pyplot as plt
+import cv2
 import numpy as np
 import scipy.ndimage
+
+
+def plt_to_numpy_array(plt, debug=False):
+
+    # start a timer because it's a long process!!
+    start_time, function_name = time.time(), "plt_to_numpy_array"
+    print("Starting", function_name)
+
+    # set up the filename to save the histogram
+    filenameToUse = "__random_" + str(int(np.random.rand() * 1000000000))
+
+    plt.savefig(os.path.join('outputNoGit',
+                             filenameToUse + "__deleteThis_y.png"))
+
+    # read the temp image back in so I can add it to the inclusion image
+    tempImage = cv2.imread(os.path.join(
+        'outputNoGit', filenameToUse + "__deleteThis_y.png"))
+
+    # and now clean up by deleting that file I just created
+    os.remove(os.path.join('outputNoGit',
+                           filenameToUse + "__deleteThis_y.png"))
+
+    # timer because it's a long process!!
+    print("Leaving",
+          function_name,
+          "and the process took",
+          time.time() - start_time)
+
+    return tempImage
 
 
 def figure_to_numpy(figure):
@@ -9,6 +41,9 @@ def figure_to_numpy(figure):
     @param figure a matplotlib figure
     @return a numpy 3D array of RGBA values
     """
+    # comes from here:
+    # http://www.icare.univ-lille1.fr/tutorials/convert_a_matplotlib_figure
+
     # draw the renderer
     figure.canvas.draw()
 
@@ -20,6 +55,7 @@ def figure_to_numpy(figure):
 
     # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
     figure_as_numpy_array = np.roll(figure_as_numpy_array, 3, axis=2)
+
     return figure_as_numpy_array
 
 
@@ -99,6 +135,13 @@ def run_tests(debug=False):
     else:
         print("The distance test did not work")
 
+    plt.figure()
+    plt.plot([1, 2, 3, 4])
+
+    array = plt_to_numpy_array(plt)
+
+    cv2.imwrite(os.path.join("outputNoGit", "test.png"), array)
+
     # timer because it's a long process!!
     print("Leaving",
           function_name,
@@ -107,48 +150,6 @@ def run_tests(debug=False):
 
     # and out of here
     return return_code
-
-
-# just in here while i was developing it
-def get_procreation_insertions(debug=False):
-
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "run_tests"
-    print("Starting", function_name)
-
-    # Test finding procreation_insertions
-    a = np.asarray([1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0])
-    b = np.asarray([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
-
-    b = b[::-1]
-
-    insertion_labels = scipy.ndimage.label(a)[0]
-
-    insertion_slices = scipy.ndimage.find_objects(insertion_labels)
-
-    procreation_insertions = []
-    firsts = []
-
-    for insertion_slice in insertion_slices:
-        insertion = b[insertion_slice].tolist()
-        procreation_insertions.append(insertion)
-
-        first = insertion[0]
-        firsts.append(first)
-
-    procreation_inserted_cities = np.hstack(procreation_insertions).tolist()
-
-    x = 11 in firsts
-    y = 12 in procreation_inserted_cities
-
-    # timer because it's a long process!!
-    print("Leaving",
-          function_name,
-          "and the process took",
-          time.time() - start_time)
-
-    # and out of here
-    return procreation_insertions, procreation_inserted_cities
 
 
 if __name__ == '__main__':
@@ -161,9 +162,6 @@ if __name__ == '__main__':
 
     # do the run_tests
     return_code = run_tests(debug=debug)
-
-    # do the run_tests
-    procreation_insertions = get_procreation_insertions(debug=debug)
 
     # final return code
     print("return_code", return_code)

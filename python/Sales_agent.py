@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import matplotlib
 import cv2
 import os
 import numpy as np
 import time
 import copy
 from utils import calculate_rout_distance
-from utils import figure_to_numpy
+from utils import plt_to_numpy_array
 from Route import Route
 
 
@@ -313,7 +314,7 @@ def run_tests(debug=False):
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 1
+    number_of_iterations = 1000
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -355,6 +356,10 @@ def run_tests(debug=False):
 
     plt.savefig(os.path.join('plots',
                              filenameToUse + ".png"))
+
+    # turn the figure into a numpy array
+    route_figure_as_array = plt_to_numpy_array(plt)
+
     plt.close('all')
 
     filenameToUse = "__cities_" + str(sales_agent_1.number_of_cities) +\
@@ -368,11 +373,18 @@ def run_tests(debug=False):
     plt.figure()
     plt.plot(sales_agent_1.distances, color='k', linestyle='-', linewidth=2)
 
-    plt.savefig(os.path.join('plots',
-                             filenameToUse + ".png"))
-
     # turn the figure into a numpy array
-    figure_as_array = figure_to_numpy(plt.figure())
+    progress_figure_as_array = plt_to_numpy_array(plt)
+
+    # put them side by side
+    plot_to_save = np.hstack(
+        (progress_figure_as_array, route_figure_as_array))
+
+    # save the stacked image
+    # matplotlib.image.imsave('plot_to_save.png', plot_to_save)
+    cv2.imwrite("plot_to_save1.png", plot_to_save)
+    cv2.imwrite("plot_to_save2xxxxxxxxxxxxxxx.png", progress_figure_as_array)
+    cv2.imwrite("plot_to_save3.png", route_figure_as_array)
 
     # clear out the plot
     plt.close('all')
