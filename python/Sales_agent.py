@@ -19,7 +19,8 @@ class Sales_agent:
         print("Starting", function_name)
 
         # save the start time
-        self.start_time = time.strftime("%Y%m%d-%H%M%S")
+        self.start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
+        self.start_time = time.time()
 
         # save the number of cities
         self.number_of_cities = number_of_cities
@@ -71,6 +72,12 @@ class Sales_agent:
         start_time, function_name = time.time(), "evolve_routes"
         print("Starting", function_name)
 
+        # set the number of iterations between plotting reults
+        number_of_plots = 50
+        number_of_iterations_between_plots_required = int(
+            max(1, self.number_of_iterations / number_of_plots))
+        number_of_iterations_between_plots = 0
+
         # create a holder to show progress of distance
         self.distances = []
 
@@ -97,6 +104,10 @@ class Sales_agent:
             # mutate the routes to make up the numbers required for the
             # proper population
             self.mutate_routes()
+
+            # if it's time to plot the progress, then do it
+            if self.iteration % number_of_iterations_between_plots_required == 0:
+                self.plot_progress()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -299,6 +310,87 @@ class Sales_agent:
               "and the process took",
               time.time() - start_time)
 
+    def plot_progress(self):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "plot_progress"
+        print("Starting", function_name)
+
+        # Spits out a graph of the progress and the current best route
+        # horizntally stacked
+        # So that a gif or animation of the development pf the route can be built
+
+        # check how fast I am going by including the
+        # iterations per minute
+        iterations_per_minute = int(
+            self.iteration / ((time.time() - self.start_time) / 60))
+
+        # create the x and y coordinates of thecities
+        # for plotting the current best route
+        x = []
+        y = []
+        for city_index in self.routes[0].route:
+            x.append(self.cities[city_index][0])
+            y.append(self.cities[city_index][1])
+
+        # start a figure
+        plt.figure()
+
+        # plot the cities on the chart
+        plt.scatter(self.cities[:, 0],
+                    self.cities[:, 1], c="red", s=500)
+        plt.plot(x, y, color='k', linestyle='-', linewidth=2)
+
+        # turn the figure into a numpy array
+        route_figure_as_array = plt_to_numpy_array(plt)
+
+        # finish that one
+        plt.close('all')
+
+        # start a new figure
+        plt.figure()
+
+        # set the axes
+        axes = plt.gca()
+        x_minimum = 0
+        x_maximum = self.number_of_iterations
+        y_minimum = 0
+        y_maximum = self.distances[0]
+        axes.set_xlim([x_minimum, x_maximum])
+        axes.set_ylim([y_minimum, y_maximum])
+
+        # plot the progress
+        plt.plot(self.distances, color='k',
+                 linestyle='-', linewidth=2)
+
+        # turn the figure into a numpy array
+        progress_figure_as_array = plt_to_numpy_array(plt)
+
+        # put them side by side
+        plot_to_save = np.hstack(
+            (progress_figure_as_array, route_figure_as_array))
+
+        # save the stacked image
+        filenameToUse = "__cities_" + str(self.number_of_cities) +\
+            "__routes_" + str(self.number_of_routes) + \
+            "__iterations_" + str(self.number_of_iterations) +\
+            "__distance_" + str(int(self.routes[0].distance)) +\
+            "__ipm_" + str(int(iterations_per_minute)) +\
+            "__type_combined" +\
+            "__iteration_" + str(self.iteration) +\
+            "__ts_" + str(self.start_time_formatted)
+        cv2.imwrite(os.path.join(
+            "plots", filenameToUse + ".png"), plot_to_save)
+
+        # clear out the plot
+        plt.close('all')
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
 
 def run_tests(debug=False):
 
@@ -310,11 +402,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 30
+    number_of_cities = 15
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 5
+    number_of_iterations = 250
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
@@ -380,7 +472,7 @@ def run_tests(debug=False):
         "__ipm_" + str(int(iterations_per_minute)) +\
         "__type_combined" +\
         "__ts_" + str(sales_agent_1.start_time)
-    cv2.imwrite(os.path.join("plots", filenameToUse, ".png"), plot_to_save)
+    cv2.imwrite(os.path.join("plots", filenameToUse + ".png"), plot_to_save)
 
     # clear out the plot
     plt.close('all')
