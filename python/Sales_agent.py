@@ -402,11 +402,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 15
+    number_of_cities = 50
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 250
+    number_of_iterations = 1000
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
