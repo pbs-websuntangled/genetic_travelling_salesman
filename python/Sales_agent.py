@@ -48,15 +48,6 @@ class Sales_agent:
         # generate the initial pool of random routes
         self.create_routes()
 
-        # now evolve the routes to find a good one
-        self.evolve_routes()
-
-        # now save the provenance
-        self.write_provenance()
-
-        # now make the video
-        self.create_video()
-
         # timer because it's a long process!!
         print("Leaving",
               function_name,
@@ -122,6 +113,12 @@ class Sales_agent:
             # if it's time to plot the progress, then do it
             if self.iteration % number_of_iterations_between_plots_required == 0:
                 self.plot_progress()
+
+        # now save the provenance
+        self.write_provenance()
+
+        # now make the video
+        self.create_video()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -612,10 +609,45 @@ def run_tests(debug=False):
     number_of_cities = 25
     number_of_routes = 400
     debug = True
-    number_of_iterations = 550
-    number_of_iterations = 5
-    sales_agent_1 = Sales_agent(
+    # 25 cities needs 90 iterations
+    number_of_iterations = 3
+
+    number_of_gene_pools = 3
+
+    #=====================================================================================#
+    gene_pools = []
+
+    for gene_pool_index in range(number_of_gene_pools):
+
+        sales_agent = Sales_agent(
+            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+
+        # copy the cities from the 1st sales agent
+        if gene_pool_index > 0:
+            sales_agent.cities = gene_pools[0].cities
+
+        # now evolve the routes to find a good one
+        sales_agent.evolve_routes()
+
+        # now add it to the list
+        gene_pools.append(sales_agent)
+
+    #=====================================================================================#
+    # generate a new sales agent. We will replace the randomly generated journeys
+    # in a moment
+    new_sales_agent = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+
+    # now mix the dna from one object to another
+    for route_index in range(number_of_routes):
+
+        # randomly choose of the routes in each position to survive
+        gene_pool_index = np.random.choice(
+            number_of_gene_pools, number_of_gene_pools, repl)
+
+        # now copy one of the corresonding route to the nee_sales_agent
+        # from one of the randomly selected sales_agents
+        new_sales_agent.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
 
     # timer because it's a long process!!
     print("Leaving",
