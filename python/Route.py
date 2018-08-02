@@ -109,6 +109,7 @@ class Route:
 
         # Randomly swaps n pairs of cities in a copy of the
         # route and returns that copy to the caller
+        # It's like procreation but with only one parent
 
         # so take a copy
         copy_of_route = copy.deepcopy(self)
@@ -239,9 +240,36 @@ class Route:
 
         # half of the time, reverse the mother
         # to create more diversity
-        reverser_decider = np.random.rand()
-        if reverser_decider > 0.5:
+        reverser_decider_mother = np.random.rand()
+        if reverser_decider_mother > 0.5:
+
+            # and do a deep copy before the reverse so we don't
+            # alter the gene pool
+            mother = copy.deepcopy(mother)
+
+            # set the provenance
+            provenance = "Child FR,"
+
             mother.route[1:] = (mother.route[1:])[::-1]
+        else:
+            # if the mother wasn't reversed,
+            # half the time reverse the father
+            reverser_decider_father = np.random.rand()
+            if reverser_decider_father > 0.5:
+
+                # and do a deep copy before the reverse so we don't
+                # alter the gene pool
+                father = copy.deepcopy(father)
+
+                # set the provenance
+                provenance = "Child FR,"
+
+            else:
+
+                # set the provenance
+                provenance = "Child,"
+
+                father.route[1:] = (mother.route[1:])[::-1]
 
         # Choose how much of each parent to take based on
         # fitness of each.
@@ -297,7 +325,7 @@ class Route:
         child.calculate_distance()
 
         # update provenace to show it's come from a mutation
-        child.provenance = mother.provenance + "Child,"
+        child.provenance = mother.provenance + provenance
 
         # allow break if it's not correct length
         if child.route.shape[0] != self.number_of_cities:

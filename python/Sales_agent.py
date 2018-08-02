@@ -42,14 +42,20 @@ class Sales_agent:
         # generate the cities with random co-ordinates
         self.create_cities()
 
+        # create a plot of all the cities with no routes
+        self.plot_cities()
+
         # generate the initial pool of random routes
         self.create_routes()
 
         # now evolve the routes to find a good one
         self.evolve_routes()
 
+        # now save the provenance
+        self.write_provenance()
+
         # now make the video
-        self.create_video(self)
+        self.create_video()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -318,7 +324,33 @@ class Sales_agent:
               "and the process took",
               time.time() - start_time)
 
-    def create_video(self, file_name):
+    def write_provenance(self):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "create_routes"
+        print("Starting", function_name)
+
+        # create a filename
+        filename_to_use = "__cities_" + str(self.number_of_cities) +\
+            "__routes_" + str(self.number_of_routes) + \
+            "__iterations_" + str(self.number_of_iterations) +\
+            "__distance_" + str(int(self.routes[0].distance)) +\
+            "__type_provenance" +\
+            "__ts_" + str(self.start_time_formatted) +\
+            ".txt"
+        filename_to_use = os.path.join("outputNoGit", filename_to_use)
+
+        # write out the provenance
+        with open(filename_to_use, 'a') as the_file:
+            the_file.write(self.routes[0].provenance)
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+    def create_video(self):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "create_video"
@@ -370,7 +402,7 @@ class Sales_agent:
 
                 # just show white first
                 for factor in range(2 * fade_factor):
-                    faded = white * (2 * factor/fade_factor)
+                    faded = white * (factor / (2 * fade_factor))
                     writer.write(faded.astype(np.uint8))
 
                 # then fade in the first plot
@@ -381,7 +413,7 @@ class Sales_agent:
                     writer.write(faded.astype(np.uint8))
 
                 # then hold the first plot for viewers to take it in
-                for _ in range(fade_factor):
+                for _ in range(3 * fade_factor):
                     writer.write(faded.astype(np.uint8))
 
                 continue
@@ -447,12 +479,10 @@ class Sales_agent:
 
         plt.plot(x, y, color='k', linestyle='-', linewidth=2)
 
-        plt.title("City locations and best route so far\n (distance: " +
+        plt.title(str(self.number_of_cities) + " City locations and best route so far\n (distance: " +
                   str(int(self.distances[-1])) + ")")
 
-        # plt.annotate('Something', (0, 0), (0, -20),
-        #             xycoords='axes fraction', textcoords='offset points', va='top')
-
+        # nice and clean
         plt.axis('off')
 
         # turn the figure into a numpy array
@@ -467,9 +497,9 @@ class Sales_agent:
         # set the axes
         axes = plt.gca()
         x_minimum = 0
-        x_maximum = self.number_of_iterations
+        x_maximum = self.number_of_iterations - 1
         y_minimum = 0
-        y_maximum = self.distances[0]
+        y_maximum = self.distances[0] * 1.05
         axes.set_xlim([x_minimum, x_maximum])
         axes.set_ylim([y_minimum, y_maximum])
 
@@ -479,6 +509,9 @@ class Sales_agent:
         # plot the progress
         plt.plot(self.distances, color='k',
                  linestyle='-', linewidth=2)
+
+        # put a colourful dot on the beginning of the line
+        plt.scatter(0, self.distances[-1], c="green", s=400)
 
         # turn the figure into a numpy array
         progress_figure_as_array = plt_to_numpy_array(plt)
@@ -511,6 +544,60 @@ class Sales_agent:
               "and the process took",
               time.time() - start_time)
 
+    def plot_cities(self):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "plot_cities"
+        print("Starting", function_name)
+
+        # Spits out a plot of just the cities with no routes on
+
+        # create the x and y coordinates of thecities
+        # for plotting the current best route
+        x = []
+        y = []
+        for city in self.cities:
+            x.append(city[0])
+            y.append(city[1])
+
+        # start a figure
+        plt.figure()
+
+        # plot the cities on the chart
+        home_city = self.cities[0]
+
+        # put the home city on with a bigger red dot
+        plt.scatter(home_city[0], home_city[1], c="red", s=500)
+
+        # put the rest of the cities on
+        plt.scatter(x[1:],  y[1:], c="blue", s=100)
+
+        # add the title
+        plt.title(str(self.number_of_cities) + " City locations")
+
+        # nice and clean
+        # plt.axis('off')
+
+        # Create a meaningful filename
+        filename_to_use = "__cities_" + str(self.number_of_cities) +\
+            "__routes_" + str(self.number_of_routes) + \
+            "__iterations_" + str(self.number_of_iterations) +\
+            "__type_cities" +\
+            "__ts_" + str(self.start_time_formatted)
+
+        # save the file
+        plt.savefig(os.path.join('outputNoGit',
+                                 filename_to_use + ".png"))
+
+        # finish that one
+        plt.close('all')
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
 
 def run_tests(debug=False):
 
@@ -522,11 +609,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 9
+    number_of_cities = 25
     number_of_routes = 400
     debug = True
     number_of_iterations = 550
-    number_of_iterations = 10
+    number_of_iterations = 5
     sales_agent_1 = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
