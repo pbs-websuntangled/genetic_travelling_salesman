@@ -609,7 +609,7 @@ def run_tests(debug=False):
     number_of_routes = 400
     debug = True
     # 25 cities needs 90 iterations
-    number_of_iterations = 500
+    number_of_iterations = 2000
 
     number_of_gene_pools = 3
 
@@ -636,6 +636,9 @@ def run_tests(debug=False):
     # in a moment
     new_sales_agent = Sales_agent(
         number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+
+    # now put the original cities in place
+    new_sales_agent.cities = gene_pools[0].cities
 
     # now mix the dna from one object to another
     for route_index in range(number_of_routes):
