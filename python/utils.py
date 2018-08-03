@@ -226,6 +226,11 @@ if __name__ == '__main__':
     # consistently for testing purposes
     np.random.seed(1)
 
+    for _ in range(20):
+        # jest remind hopw this function works
+        gene_pool_index = int(np.random.random() * 3)
+        break_here = True
+
     # do the run_tests
     return_code = run_tests(debug=debug)
 

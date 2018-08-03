@@ -302,9 +302,8 @@ class Sales_agent:
         print("Starting", function_name)
 
         # create the routes
-        number_of_routes = 20
         routes = []
-        for _ in range(number_of_routes):
+        for _ in range(self.number_of_routes):
 
             route = np.random.choice(
                 self.number_of_cities, self.number_of_cities, replace=False)
@@ -606,11 +605,11 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 25
+    number_of_cities = 70
     number_of_routes = 400
     debug = True
     # 25 cities needs 90 iterations
-    number_of_iterations = 3
+    number_of_iterations = 500
 
     number_of_gene_pools = 3
 
@@ -642,12 +641,16 @@ def run_tests(debug=False):
     for route_index in range(number_of_routes):
 
         # randomly choose of the routes in each position to survive
-        gene_pool_index = np.random.choice(
-            number_of_gene_pools, number_of_gene_pools, repl)
-
+        gene_pool_index = int(np.random.random() * number_of_gene_pools)
         # now copy one of the corresonding route to the nee_sales_agent
         # from one of the randomly selected sales_agents
-        new_sales_agent.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
+        try:
+            new_sales_agent.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
+        except:
+            you_can_break_here = True
+
+    # now evolve the routes after the gene pool leak
+    new_sales_agent.evolve_routes()
 
     # timer because it's a long process!!
     print("Leaving",
