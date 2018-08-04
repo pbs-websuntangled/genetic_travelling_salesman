@@ -13,7 +13,7 @@ from Route import Route
 
 class Sales_agent:
 
-    def __init__(self, number_of_cities, number_of_routes, number_of_iterations, debug=False):
+    def __init__(self, name, number_of_cities, number_of_routes, number_of_iterations, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "__init__Country"
@@ -22,6 +22,9 @@ class Sales_agent:
         # save the start time
         self.start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
         self.start_time = time.time()
+
+        # save the name
+        self.name = name
 
         # save the number of cities
         self.number_of_cities = number_of_cities
@@ -64,6 +67,25 @@ class Sales_agent:
         number_of_axis = 2  # for generating the coordinates
         shape = (self.number_of_cities, number_of_axis)
         self.cities = np.random.choice(self.country_size, shape)
+
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
+
+    def set_cities(self, cities):
+
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "set_cities"
+        print("Starting", function_name)
+
+        # create the cities
+        self.cities = cities
+
+        # and now recreate the routes because they contain
+        # a copy of the cities
+        self.create_routes()
 
         # timer because it's a long process!!
         print("Leaving",
@@ -269,7 +291,7 @@ class Sales_agent:
     def procreate_routes(self):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "create_routes"
+        start_time, function_name = time.time(), "procreate_routes"
         print("Starting", function_name)
 
         # create offspring
@@ -517,7 +539,8 @@ class Sales_agent:
             (progress_figure_as_array, route_figure_as_array))
 
         # save the stacked image
-        filename_to_use = "__cities_" + str(self.number_of_cities) +\
+        filename_to_use = "__name_" + self.name +\
+            "__cities_" + str(self.number_of_cities) +\
             "__routes_" + str(self.number_of_routes) + \
             "__iterations_" + str(self.number_of_iterations) +\
             "__distance_" + str(int(self.routes[0].distance)) +\
@@ -575,7 +598,8 @@ class Sales_agent:
         # plt.axis('off')
 
         # Create a meaningful filename
-        filename_to_use = "__cities_" + str(self.number_of_cities) +\
+        filename_to_use = "__name_" + self.name +\
+            "__cities_" + str(self.number_of_cities) +\
             "__routes_" + str(self.number_of_routes) + \
             "__iterations_" + str(self.number_of_iterations) +\
             "__type_cities" +\
@@ -605,25 +629,30 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 70
+    number_of_cities = 25
     number_of_routes = 400
     debug = True
     # 25 cities needs 90 iterations
-    number_of_iterations = 2000
+    number_of_iterations = 150
 
-    number_of_gene_pools = 3
+    number_of_gene_pools = 5
 
     #=====================================================================================#
     gene_pools = []
 
     for gene_pool_index in range(number_of_gene_pools):
 
-        sales_agent = Sales_agent(
-            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+        # generate the name
+        name = "gene_pool_" + str(gene_pool_index)
+
+        # create the sales agent
+        sales_agent = Sales_agent(name,
+                                  number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
         # copy the cities from the 1st sales agent
+        # and populate all the routes with thise cities
         if gene_pool_index > 0:
-            sales_agent.cities = gene_pools[0].cities
+            sales_agent.set_cities(gene_pools[0].cities)
 
         # now evolve the routes to find a good one
         sales_agent.evolve_routes()
@@ -634,11 +663,17 @@ def run_tests(debug=False):
     #=====================================================================================#
     # generate a new sales agent. We will replace the randomly generated journeys
     # in a moment
-    new_sales_agent = Sales_agent(
-        number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+
+    # generate the name
+    name = "gene_pool_combined"
+
+    # now create the new sales agent before injecting the route dna from the others
+    new_sales_agent = Sales_agent(name,
+                                  number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
     # now put the original cities in place
-    new_sales_agent.cities = gene_pools[0].cities
+    cities_to_use = gene_pools[0].cities
+    new_sales_agent.set_cities(cities_to_use)
 
     # now mix the dna from one object to another
     for route_index in range(number_of_routes):
