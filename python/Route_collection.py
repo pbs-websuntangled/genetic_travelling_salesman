@@ -6,8 +6,9 @@ import os
 import numpy as np
 import time
 import copy
+from utils import calculate_rout_distance
 from utils import plt_to_numpy_array
-from Route_collection import Route_collection
+from Route import Route
 
 
 class Route_collection:
@@ -15,7 +16,7 @@ class Route_collection:
     def __init__(self, name, number_of_cities, number_of_routes, number_of_iterations, debug=False):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__Country"
+        start_time, function_name = time.time(), "__init__" + "Route_collection"
         print("Starting", function_name)
 
         # save the start time
@@ -35,11 +36,16 @@ class Route_collection:
         self.number_of_iterations = number_of_iterations
 
         # how big is my country
-        self.country_size = 100
+        self.country_size = number_of_cities * number_of_cities
 
         # create a home for all the plot images that are np arrays
         # they will be used to save out as pictures or write to a video file
         self.plots = []
+
+        # create a slot for the standard deviations of the routes at each iteration
+        # used for creating a measure of the route population diversity
+        self.standard_deviations = []
+        self.diversities = []
 
         # generate the cities with random co-ordinates
         self.create_cities()
@@ -102,7 +108,6 @@ class Route_collection:
         number_of_plots = 50
         number_of_iterations_between_plots_required = int(
             max(1, self.number_of_iterations / number_of_plots))
-        number_of_iterations_between_plots = 0
 
         # create a holder to show progress of distance
         self.distances = []
@@ -153,7 +158,7 @@ class Route_collection:
         start_time, function_name = time.time(), "evaluate_routes"
         print("Starting", function_name)
 
-        # sort the routes
+        # sort the routes as the distances have already been calculated
         self.routes.sort(key=lambda x: x.distance, reverse=False)
 
         # save the best distance
@@ -165,6 +170,21 @@ class Route_collection:
                 self.routes[0].distance
         except:
             you_can_break_here = True
+
+        # create a measure of diversity
+        # Quick and dirty is a function of the median, min and max routes
+        # diversity = max(max_route - med_route, med_route - min_route) / (max_route - min_route)
+        # or...
+        # diversity = 1 - min(max_route - med_route, med_route - min_route) / max(max_route - med_route, med_route - min_route)
+        # so if they are mostly clustered up one end diversity is lower
+        # use low diversity to drive more deaths, more radical procreation and more (and more radical) mutations
+        index_of_median = int(self.number_of_cities)
+        delta_top = self.routes[index_of_median].distance - \
+            self.routes[0].distance
+        delta_bottom = self.routes[-1].distance - \
+            self.routes[index_of_median].distance
+        self.diversities.append(min(delta_top, delta_bottom) /
+                                max(delta_top, delta_bottom))
 
         if self.range_of_distances != 0:
 
@@ -182,6 +202,9 @@ class Route_collection:
                                      self.routes[0].distance) / self.range_of_distances
 
                 # try alternate route fitness
+                # as the position of the shortest route is 0,
+                # the fitness of that route will be 1
+                # This ensures it will survive
                 route.fitness = 1 - position / self.number_of_routes
 
                 # increment the position
@@ -199,23 +222,42 @@ class Route_collection:
         start_time, function_name = time.time(), "kill_weakest_routes"
         print("Starting", function_name)
 
-        # generate the set of random numbers in one hit
-        death_tokens = np.random.rand(self.number_of_routes)
+        # Generates a random amount of danger for each route
+        # If the danger is higher than the fitness, the route will die
+        # generate the set of random dangers in one hit
+        # This function gives a higher proportion of higher dangers
+        # More of the fit ones will die
+        # More will die overall
+        # this function kills about 75% of the routes
+        dangers = 1 - np.random.rand(self.number_of_routes) * \
+            np.random.rand(self.number_of_routes)
 
-        # now check fitness against the death token
+        # how to make it kill more when the diversty is lower and less when it's higher?
+        #  - discount the fitness by the diversity factor in the loop
+
+        # now check fitness against the dangers
         # kill if it's less
         # by not copying it over to new list
         new_routes = []
         for route_index, route in enumerate(self.routes):
 
+            # ensure the fittest one goes through
+            # and discount the fitness by the diversity
+            if route_index != 0:
+                fitness = route.fitness * self.diversities[-1]
+            else:
+                fitness = route.fitness
+
             # is it fit enough?
-            danger = death_tokens[route_index]
-            if danger <= route.fitness:
+            danger = dangers[route_index]
+            if danger <= fitness:
 
                 # this route survives!!
                 new_routes.append(self.routes[route_index])
 
         # have I destroyed all the routes!!
+        # it really should be impossible as the fittest route
+        # has a health of 1
         if len(new_routes) == 0:
             you_can_break_here = True
 
@@ -648,50 +690,50 @@ def run_tests(debug=False):
         # generate the name
         name = "gene_pool_" + str(gene_pool_index)
 
-        # create the sales agent
-        sales_agent = Route_collection(name,
-                                       number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+        # create the route collection
+        route_collection = Route_collection(name,
+                                            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
-        # copy the cities from the 1st sales agent
+        # copy the cities from the 1st route collection
         # and populate all the routes with thise cities
         if gene_pool_index > 0:
-            sales_agent.set_cities(gene_pools[0].cities)
+            route_collection.set_cities(gene_pools[0].cities)
 
         # now evolve the routes to find a good one
-        sales_agent.evolve_routes()
+        route_collection.evolve_routes()
 
         # now add it to the list
-        gene_pools.append(sales_agent)
+        gene_pools.append(route_collection)
 
     #=====================================================================================#
-    # generate a new sales agent. We will replace the randomly generated journeys
+    # generate a new route collection. We will replace the randomly generated journeys
     # in a moment
 
     # generate the name
     name = "gene_pool_combined"
 
-    # now create the new sales agent before injecting the route dna from the others
-    new_sales_agent = Route_collection(name,
-                                       number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+    # now create the new route collection before injecting the route dna from the others
+    new_route_collection = Route_collection(name,
+                                            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
 
     # now put the original cities in place
     cities_to_use = gene_pools[0].cities
-    new_sales_agent.set_cities(cities_to_use)
+    new_route_collection.set_cities(cities_to_use)
 
     # now mix the dna from one object to another
     for route_index in range(number_of_routes):
 
         # randomly choose of the routes in each position to survive
         gene_pool_index = int(np.random.random() * number_of_gene_pools)
-        # now copy one of the corresonding route to the nee_sales_agent
-        # from one of the randomly selected sales_agents
+        # now copy one of the corresonding route to the nee_route_collection
+        # from one of the randomly selected route_collections
         try:
-            new_sales_agent.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
+            new_route_collection.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
         except:
             you_can_break_here = True
 
     # now evolve the routes after the gene pool leak
-    new_sales_agent.evolve_routes()
+    new_route_collection.evolve_routes()
 
     # timer because it's a long process!!
     print("Leaving",

@@ -11,7 +11,7 @@ class Route:
     def __init__(self, cities):
 
         # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__Route"
+        start_time, function_name = time.time(), "__init__" + "Route"
         print("Starting", function_name)
 
         # save the cities
