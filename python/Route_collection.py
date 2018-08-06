@@ -13,7 +13,7 @@ from Route import Route
 
 class Route_collection:
 
-    def __init__(self, name, number_of_cities, number_of_routes, number_of_iterations, debug=False):
+    def __init__(self, name, number_of_cities, number_of_routes, number_of_super_iterations, number_of_iterations, super_iteration_number=0, number_of_gene_pools=1, debug=False):
 
         if debug:
             # start a timer because it's a long process!!
@@ -33,8 +33,15 @@ class Route_collection:
         # save the number of routes
         self.number_of_routes = number_of_routes
 
+        # save the number of geen_pools
+        self.number_of_gene_pools = number_of_gene_pools
+
+        # save the number of super_iterations
+        self.number_of_super_iterations = number_of_super_iterations
+
         # save the number of iterations
         self.number_of_iterations = number_of_iterations
+        self.super_iteration_number = super_iteration_number
 
         # how big is my country
         self.country_size = number_of_cities * number_of_cities
@@ -47,6 +54,9 @@ class Route_collection:
         # used for creating a measure of the route population diversity
         self.standard_deviations = []
         self.diversities = []
+
+        # create a holder to show progress of distance
+        self.distances = []
 
         # generate the cities with random co-ordinates
         self.create_cities(debug=debug)
@@ -117,10 +127,7 @@ class Route_collection:
         # set the number of iterations between plotting reults
         number_of_plots = 50
         number_of_iterations_between_plots_required = int(
-            max(1, self.number_of_iterations / number_of_plots))
-
-        # create a holder to show progress of distance
-        self.distances = []
+            max(1, self.number_of_iterations * self.number_of_super_iterations / number_of_plots))
 
         # iterate the evolution process
         for self.iteration in range(self.number_of_iterations):
@@ -257,7 +264,7 @@ class Route_collection:
 
                 # now it has to survive the diversity check as well
                 # unless it has fitness of 1
-                if (self.diversities[-1] > diversity_checks[route_index]) or (self.fitness == 1):
+                if (self.diversities[-1] > diversity_checks[route_index]) or (route.fitness == 1):
 
                     # this route survives!!
                     new_routes.append(self.routes[route_index])
@@ -413,9 +420,10 @@ class Route_collection:
             print("Starting", function_name)
 
         # create a filename
-        filename_to_use = "__name_" + self.name +\
+        filename_to_use = "__name_" + self.name + \
             "__cities_" + str(self.number_of_cities) +\
-            "__routes_" + str(self.number_of_routes) + \
+            "__routes_" + str(self.number_of_routes) +\
+            "__superIterations_" + str(self.number_of_super_iterations) +\
             "__iterations_" + str(self.number_of_iterations) +\
             "__distance_" + str(int(self.routes[0].distance)) +\
             "__type_provenance" +\
@@ -434,7 +442,7 @@ class Route_collection:
                   "and the process took",
                   time.time() - start_time)
 
-    def create_video(self, debug=False):
+    def create_video(self, plots, unique_name, debug=False):
 
         if debug:
             # start a timer because it's a long process!!
@@ -444,9 +452,11 @@ class Route_collection:
         # create a filename
         filename_to_use = "__name_" + self.name +\
             "__cities_" + str(self.number_of_cities) +\
-            "__routes_" + str(self.number_of_routes) + \
+            "__routes_" + str(self.number_of_routes) +\
+            "__superIterations_" + str(self.number_of_super_iterations) +\
             "__iterations_" + str(self.number_of_iterations) +\
             "__distance_" + str(int(self.routes[0].distance)) +\
+            "__uniqueName" + unique_name +\
             "__type_video" +\
             "__ts_" + str(self.start_time_formatted) +\
             ".avi"
@@ -460,8 +470,6 @@ class Route_collection:
         fourcc = cv2.VideoWriter_fourcc(*"MJPG")
         frames_per_second = 20
         writer = None
-        (h, w) = (None, None)
-        zeros = None
 
         frame = self.plots[0]  # for sizing some artefacts
 
@@ -574,7 +582,7 @@ class Route_collection:
         plt.axis('off')
 
         # turn the figure into a numpy array
-        route_figure_as_array = plt_to_numpy_array(plt)
+        route_figure_as_array = plt_to_numpy_array(plt, scale_factor=0.5)
 
         # finish that one
         plt.close('all')
@@ -585,7 +593,7 @@ class Route_collection:
         # set the axes
         axes = plt.gca()
         x_minimum = 0
-        x_maximum = self.number_of_iterations - 1
+        x_maximum = self.number_of_iterations * self.number_of_super_iterations - 1
         y_minimum = 0
         y_maximum = self.distances[0] * 1.05
         axes.set_xlim([x_minimum, x_maximum])
@@ -602,7 +610,7 @@ class Route_collection:
         plt.scatter(0, self.distances[-1], c="green", s=400)
 
         # turn the figure into a numpy array
-        progress_figure_as_array = plt_to_numpy_array(plt)
+        progress_figure_as_array = plt_to_numpy_array(plt, scale_factor=0.5)
 
         # put them side by side
         plot_to_save = np.hstack(
@@ -612,10 +620,12 @@ class Route_collection:
         filename_to_use = "__name_" + self.name +\
             "__cities_" + str(self.number_of_cities) +\
             "__routes_" + str(self.number_of_routes) + \
+            "__superIterations_" + str(self.number_of_super_iterations) +\
             "__iterations_" + str(self.number_of_iterations) +\
             "__distance_" + str(int(self.routes[0].distance)) +\
             "__ipm_" + str(int(iterations_per_minute)) +\
             "__type_combined" +\
+            "__superIteration_" + str(self.super_iteration_number) +\
             "__iteration_" + str(self.iteration) +\
             "__ts_" + str(self.start_time_formatted)
         cv2.imwrite(os.path.join(
@@ -673,6 +683,7 @@ class Route_collection:
         filename_to_use = "__name_" + self.name +\
             "__cities_" + str(self.number_of_cities) +\
             "__routes_" + str(self.number_of_routes) + \
+            "__superIterations_" + str(self.number_of_super_iterations) +\
             "__iterations_" + str(self.number_of_iterations) +\
             "__type_cities" +\
             "__ts_" + str(self.start_time_formatted)
@@ -705,10 +716,10 @@ def run_tests(debug=False):
     number_of_cities = 25
     number_of_routes = 400
     # 25 cities needs 90 iterations
-    number_of_super_iterations = 10
-    number_of_iterations = 5
+    number_of_super_iterations = 2
+    number_of_iterations = 3
 
-    number_of_gene_pools = 5
+    number_of_gene_pools = 2
 
     #=====================================================================================#
     # first create all the gene pools with the cloned cities in all of them
@@ -720,7 +731,7 @@ def run_tests(debug=False):
 
         # create the route collection
         route_collection = Route_collection(name,
-                                            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+                                            number_of_cities, number_of_routes, number_of_super_iterations, number_of_iterations, debug=debug)
 
         # copy the cities from the 1st route collection
         # and populate all the routes with thise cities
@@ -767,7 +778,7 @@ def run_tests(debug=False):
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
                                  gene_pool_donor_index].provenance = recipient.routes[-1 -
-                                                                                      gene_pool_donor_index].provenance + "Leaked, "
+                                                                                      gene_pool_donor_index].provenance + "Leaked from " + donor.name + ", "
 
     # We've done all the super iterations so make the videos
     for gene_pool_index in range(number_of_gene_pools):
@@ -779,7 +790,34 @@ def run_tests(debug=False):
         gene_pool.write_provenance(debug=debug)
 
         # now make the video
-        gene_pool.create_video(debug=debug)
+        unique_name = "allSuperIterations"
+        gene_pool.create_video(gene_pool.plots, unique_name, debug=debug)
+
+    # and now make a video stacking all the gene pools on top of each other
+    # all the gene pools have the same number of plots
+    all_stacked_plots = []
+
+    # loop round the plots and then for each one, get the appropriate one for each gene pool
+    number_of_plots = len(gene_pools[0].plots)
+    for plot_index in range(number_of_plots):
+
+        for gene_pool_index in range(number_of_gene_pools):
+
+            # we already have the 1st one stacked
+            if gene_pool_index == 0:
+                stacked_plots = gene_pools[0].plots[plot_index]
+
+            else:
+                stacked_plots = np.vstack((
+                    stacked_plots, gene_pools[gene_pool_index].plots[plot_index]))
+
+        # now append the stacked plots to all the stacked plots
+        all_stacked_plots.append(stacked_plots)
+
+    # now we have all the stacked plots, make a video of that
+    # now make the video
+    unique_name = "allGenePoolsStacked"
+    gene_pools[0].create_video(all_stacked_plots, unique_name, debug=debug)
 
     print("Leaving",
           function_name,

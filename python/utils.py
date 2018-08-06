@@ -70,7 +70,7 @@ def create_video(debug=False):
     break_here = True
 
 
-def plt_to_numpy_array(plt, debug=False):
+def plt_to_numpy_array(plt, scale_factor=1, debug=False):
 
     if debug:
         # start a timer because it's a long process!!
@@ -84,12 +84,17 @@ def plt_to_numpy_array(plt, debug=False):
                              filenameToUse + "__deleteThis_y.png"))
 
     # read the temp image back in so I can add it to the inclusion image
-    tempImage = cv2.imread(os.path.join(
+    image = cv2.imread(os.path.join(
         'outputNoGit', filenameToUse + "__deleteThis_y.png"))
 
-    # and now clean up by deleting that file I just created
-    os.remove(os.path.join('outputNoGit',
-                           filenameToUse + "__deleteThis_y.png"))
+    # if it needs scaling, do it now
+    if scale_factor < 1:
+        image = cv2.resize(image, None, fx=scale_factor,
+                           fy=scale_factor, interpolation=cv2.INTER_AREA)
+
+    elif scale_factor > 1:
+        image = cv2.resize(image, None, fx=scale_factor,
+                           fy=scale_factor, interpolation=cv2.INTER_CUBIC)
 
     if debug:
         # timer because it's a long process!!
@@ -98,7 +103,11 @@ def plt_to_numpy_array(plt, debug=False):
               "and the process took",
               time.time() - start_time)
 
-    return tempImage
+    # and now clean up by deleting that file I just created
+    os.remove(os.path.join('outputNoGit',
+                           filenameToUse + "__deleteThis_y.png"))
+
+    return image
 
 
 def figure_to_numpy(figure):
