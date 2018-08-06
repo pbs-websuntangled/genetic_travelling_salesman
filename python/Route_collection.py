@@ -256,7 +256,8 @@ class Route_collection:
             if danger <= route.fitness:
 
                 # now it has to survive the diversity check as well
-                if self.diversities[-1] > diversity_checks[route_index]:
+                # unless it has fitness of 1
+                if (self.diversities[-1] > diversity_checks[route_index]) or (self.fitness == 1):
 
                     # this route survives!!
                     new_routes.append(self.routes[route_index])
