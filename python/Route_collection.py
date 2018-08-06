@@ -51,9 +51,6 @@ class Route_collection:
         # generate the cities with random co-ordinates
         self.create_cities(debug=debug)
 
-        # create a plot of all the cities with no routes
-        self.plot_cities(debug=debug)
-
         # generate the initial pool of random routes
         self.create_routes(debug=debug)
 
@@ -76,6 +73,9 @@ class Route_collection:
         shape = (self.number_of_cities, number_of_axis)
         self.cities = np.random.choice(self.country_size, shape)
 
+        # create a plot of all the cities with no routes
+        self.plot_cities(debug=debug)
+
         # timer because it's a long process!!
         if debug:
             print("Leaving",
@@ -96,6 +96,9 @@ class Route_collection:
         # and now recreate the routes because they contain
         # a copy of the cities
         self.create_routes(debug=debug)
+
+        # create a plot of all the cities with no routes
+        self.plot_cities(debug=debug)
 
         # timer because it's a long process!!
         if debug:
@@ -146,12 +149,6 @@ class Route_collection:
             # if it's time to plot the progress, then do it
             if self.iteration % number_of_iterations_between_plots_required == 0:
                 self.plot_progress(debug=debug)
-
-        # now save the provenance
-        self.write_provenance(debug=debug)
-
-        # now make the video
-        self.create_video(debug=debug)
 
         # timer because it's a long process!!
         if debug:
@@ -243,6 +240,8 @@ class Route_collection:
         dangers = 1 - np.random.rand(self.number_of_routes) * \
             np.random.rand(self.number_of_routes)
 
+        diversity_checks = np.random.rand(self.number_of_routes)
+
         # how to make it kill more when the diversty is lower and less when it's higher?
         #  - discount the fitness by the diversity factor in the loop
 
@@ -252,19 +251,15 @@ class Route_collection:
         new_routes = []
         for route_index, route in enumerate(self.routes):
 
-            # ensure the fittest one goes through
-            # and discount the fitness by the diversity
-            if route_index != 0:
-                fitness = route.fitness * self.diversities[-1]
-            else:
-                fitness = route.fitness
-
             # is it fit enough?
             danger = dangers[route_index]
-            if danger <= fitness:
+            if danger <= route.fitness:
 
-                # this route survives!!
-                new_routes.append(self.routes[route_index])
+                # now it has to survive the diversity check as well
+                if self.diversities[-1] > diversity_checks[route_index]:
+
+                    # this route survives!!
+                    new_routes.append(self.routes[route_index])
 
         # have I destroyed all the routes!!
         # it really should be impossible as the fittest route
@@ -321,6 +316,10 @@ class Route_collection:
             # function of the inverse fitness
             number_of_mutations = int(max(minimum_mutatations_per_route,
                                           maximum_mutations_per_route * (1 - self.routes[route_index].fitness)))
+
+            # if the diversity is low, then we need more mutations
+            number_of_mutations = int(
+                number_of_mutations / self.diversities[-1])
 
             # create a copy and put it onto the  end of the list
             if len(self.routes) < self.number_of_routes:
@@ -392,7 +391,7 @@ class Route_collection:
             route = Route(self.cities)
 
             # tell it where it came from
-            route.provenance = self.name + " number " + str(route_index) + ","
+            route.provenance = self.name + " number " + str(route_index) + ", "
             routes.append(route)
 
         # and save them
@@ -442,7 +441,8 @@ class Route_collection:
             print("Starting", function_name)
 
         # create a filename
-        filename_to_use = "__cities_" + str(self.number_of_cities) +\
+        filename_to_use = "__name_" + self.name +\
+            "__cities_" + str(self.number_of_cities) +\
             "__routes_" + str(self.number_of_routes) + \
             "__iterations_" + str(self.number_of_iterations) +\
             "__distance_" + str(int(self.routes[0].distance)) +\
@@ -701,16 +701,17 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 70
+    number_of_cities = 25
     number_of_routes = 400
     # 25 cities needs 90 iterations
-    number_of_iterations = 2
+    number_of_super_iterations = 10
+    number_of_iterations = 5
 
-    number_of_gene_pools = 2
+    number_of_gene_pools = 5
 
     #=====================================================================================#
+    # first create all the gene pools with the cloned cities in all of them
     gene_pools = []
-
     for gene_pool_index in range(number_of_gene_pools):
 
         # generate the name
@@ -725,41 +726,60 @@ def run_tests(debug=False):
         if gene_pool_index > 0:
             route_collection.set_cities(gene_pools[0].cities)
 
-        # now evolve the routes to find a good one
-        route_collection.evolve_routes(debug=debug)
-
         # now add it to the list
         gene_pools.append(route_collection)
 
-    #=====================================================================================#
-    # generate a new route collection. We will replace the randomly generated journeys
-    # in a moment
+        # creata a possible break point
+        you_can_break_here = True
 
-    # generate the name
-    name = "gene_pool_combined"
+    for super_iteration_index in enumerate(range(number_of_super_iterations)):
 
-    # now create the new route collection before injecting the route dna from the others
-    new_route_collection = Route_collection(name,
-                                            number_of_cities, number_of_routes, number_of_iterations=number_of_iterations, debug=debug)
+        for gene_pool_index in range(number_of_gene_pools):
 
-    # now put the original cities in place
-    cities_to_use = gene_pools[0].cities
-    new_route_collection.set_cities(cities_to_use)
+            # pull the route collection out of the gene pool
+            route_collection = gene_pools[gene_pool_index]
 
-    # now mix the dna from one object to another
-    for route_index in range(number_of_routes):
+            # now evolve the routes to find a good one
+            route_collection.evolve_routes(debug=debug)
 
-        # randomly choose of the routes in each position to survive
-        gene_pool_index = int(np.random.random() * number_of_gene_pools)
-        # now copy one of the corresonding route to the nee_route_collection
-        # from one of the randomly selected route_collections
-        try:
-            new_route_collection.routes[route_index] = gene_pools[gene_pool_index].routes[route_index]
-        except:
-            you_can_break_here = True
+        # right now we've been round all the gene pools, leak
+        # the genes of the best routes to all the gene pools
+        for gene_pool_recipient_index in range(number_of_gene_pools):
 
-    # now evolve the routes after the gene pool leak
-    new_route_collection.evolve_routes(debug=debug)
+            # set up the recipient
+            recipient = gene_pools[gene_pool_recipient_index]
+
+            # now round the donors
+            for gene_pool_donor_index in range(number_of_gene_pools):
+
+                # don't donate to yourself
+                if gene_pool_donor_index == gene_pool_recipient_index:
+                    continue
+
+                # set up the donor
+                donor = gene_pools[gene_pool_donor_index]
+
+                # now inject onto the end of the recipient gene pool
+                recipient.routes[-1 -
+                                 gene_pool_donor_index] = copy.deepcopy(donor.routes[0])
+
+                # update the provenance to show it's leaked
+                recipient.routes[-1 -
+                                 gene_pool_donor_index].provenance = recipient.routes[-1 -
+                                                                                      gene_pool_donor_index].provenance + "Leaked, "
+
+    # We've done all the super iterations so make the videos
+    for gene_pool_index in range(number_of_gene_pools):
+
+        # set up this gene_pool
+        gene_pool = gene_pools[gene_pool_index]
+
+        # now save the provenance
+        gene_pool.write_provenance(debug=debug)
+
+        # now make the video
+        gene_pool.create_video(debug=debug)
+
     print("Leaving",
           function_name,
           "and the process took",

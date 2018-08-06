@@ -257,10 +257,10 @@ class Route:
             mother = copy.deepcopy(mother)
 
             # set the provenance
-            provenance = "Child FR,"
+            provenance = "Child Mother Reversed, "
 
             mother.route[1:] = (mother.route[1:])[::-1]
-        else:
+        else:  # the mother is not reversed
             # if the mother wasn't reversed,
             # half the time reverse the father
             reverser_decider_father = np.random.rand()
@@ -271,12 +271,12 @@ class Route:
                 father = copy.deepcopy(father)
 
                 # set the provenance
-                provenance = "Child FR,"
+                provenance = "Child Father Reversed, "
 
-            else:
+            else:  # neither the fater nor the mother are reversed
 
                 # set the provenance
-                provenance = "Child,"
+                provenance = "Child, "
 
                 father.route[1:] = (mother.route[1:])[::-1]
 
@@ -334,7 +334,7 @@ class Route:
         child.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
-        child.provenance = mother.provenance + provenance
+        child.provenance = child.provenance + provenance
 
         # allow break if it's not correct length
         if child.route.shape[0] != self.number_of_cities:
