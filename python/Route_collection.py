@@ -15,9 +15,10 @@ class Route_collection:
 
     def __init__(self, name, number_of_cities, number_of_routes, number_of_iterations, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__" + "Route_collection"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "__init__" + "Route_collection"
+            print("Starting", function_name)
 
         # save the start time
         self.start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
@@ -48,25 +49,27 @@ class Route_collection:
         self.diversities = []
 
         # generate the cities with random co-ordinates
-        self.create_cities()
+        self.create_cities(debug=debug)
 
         # create a plot of all the cities with no routes
-        self.plot_cities()
+        self.plot_cities(debug=debug)
 
         # generate the initial pool of random routes
-        self.create_routes()
+        self.create_routes(debug=debug)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def create_cities(self):
+    def create_cities(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "create_cities"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "create_cities"
+            print("Starting", function_name)
 
         # create the cities
         number_of_axis = 2  # for generating the coordinates
@@ -74,35 +77,39 @@ class Route_collection:
         self.cities = np.random.choice(self.country_size, shape)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
     def set_cities(self, cities):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "set_cities"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "set_cities"
+            print("Starting", function_name)
 
         # create the cities
         self.cities = cities
 
         # and now recreate the routes because they contain
         # a copy of the cities
-        self.create_routes()
+        self.create_routes(debug=debug)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def evolve_routes(self):
+    def evolve_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "evolve_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "evolve_routes"
+            print("Starting", function_name)
 
         # set the number of iterations between plotting reults
         number_of_plots = 50
@@ -116,47 +123,49 @@ class Route_collection:
         for self.iteration in range(self.number_of_iterations):
 
             # evaluate this set of routes
-            self.evaluate_routes()
+            self.evaluate_routes(debug=debug)
 
             # have I finished?
             if self.range_of_distances == 0:
                 break
 
             # kill the weakest routes
-            number_killed = self.kill_weakest_routes()
+            number_killed = self.kill_weakest_routes(debug=debug)
             self.number_survived = self.number_of_routes - number_killed
 
             # do procreation
             self.number_of_children = 0
             do_this = True
             if do_this == True:
-                self.procreate_routes()
+                self.procreate_routes(debug=debug)
 
             # mutate the routes to make up the numbers required for the
             # proper population
-            self.mutate_routes()
+            self.mutate_routes(debug=debug)
 
             # if it's time to plot the progress, then do it
             if self.iteration % number_of_iterations_between_plots_required == 0:
-                self.plot_progress()
+                self.plot_progress(debug=debug)
 
         # now save the provenance
-        self.write_provenance()
+        self.write_provenance(debug=debug)
 
         # now make the video
-        self.create_video()
+        self.create_video(debug=debug)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def evaluate_routes(self):
+    def evaluate_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "evaluate_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "evaluate_routes"
+            print("Starting", function_name)
 
         # sort the routes as the distances have already been calculated
         self.routes.sort(key=lambda x: x.distance, reverse=False)
@@ -211,16 +220,18 @@ class Route_collection:
                 position = position + 1
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def kill_weakest_routes(self):
+    def kill_weakest_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "kill_weakest_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "kill_weakest_routes"
+            print("Starting", function_name)
 
         # Generates a random amount of danger for each route
         # If the danger is higher than the fitness, the route will die
@@ -268,19 +279,21 @@ class Route_collection:
         number_of_routes_killed = self.number_of_routes - len(new_routes)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         return number_of_routes_killed
 
-    def mutate_routes(self):
+    def mutate_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "mutate_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "mutate_routes"
+            print("Starting", function_name)
 
         # creates new routes that are mutations of the existing routes
         # a single mutation is achieved by swapping a pair of randomly chosen cites
@@ -313,7 +326,8 @@ class Route_collection:
             if len(self.routes) < self.number_of_routes:
 
                 # put a copy of this one on the end
-                self.routes.append(route.mutate_route(number_of_mutations))
+                self.routes.append(route.mutate_route(
+                    number_of_mutations, debug=False))
 
             else:
 
@@ -321,19 +335,21 @@ class Route_collection:
                 return
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         return
 
-    def procreate_routes(self):
+    def procreate_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "procreate_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "procreate_routes"
+            print("Starting", function_name)
 
         # create offspring
         #
@@ -353,16 +369,18 @@ class Route_collection:
             self.routes.append(child_route)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def create_routes(self):
+    def create_routes(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "create_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "create_routes"
+            print("Starting", function_name)
 
         # create the routes
         routes = []
@@ -381,16 +399,18 @@ class Route_collection:
         self.routes = routes
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def write_provenance(self):
+    def write_provenance(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "create_routes"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "create_routes"
+            print("Starting", function_name)
 
         # create a filename
         filename_to_use = "__name_" + self.name +\
@@ -408,16 +428,18 @@ class Route_collection:
             the_file.write(self.routes[0].provenance)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def create_video(self):
+    def create_video(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "create_video"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "create_video"
+            print("Starting", function_name)
 
         # create a filename
         filename_to_use = "__cities_" + str(self.number_of_cities) +\
@@ -500,16 +522,18 @@ class Route_collection:
         you_can_break_here = True
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def plot_progress(self):
+    def plot_progress(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "plot_progress"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "plot_progress"
+            print("Starting", function_name)
 
         # Spits out a graph of the progress and the current best route
         # horizntally stacked
@@ -603,16 +627,18 @@ class Route_collection:
         self.plots.append(plot_to_save)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def plot_cities(self):
+    def plot_cities(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "plot_cities"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "plot_cities"
+            print("Starting", function_name)
 
         # Spits out a plot of just the cities with no routes on
 
@@ -658,10 +684,11 @@ class Route_collection:
         plt.close('all')
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
 
 def run_tests(debug=False):
@@ -676,11 +703,10 @@ def run_tests(debug=False):
     # create a country
     number_of_cities = 70
     number_of_routes = 400
-    debug = True
     # 25 cities needs 90 iterations
-    number_of_iterations = 1500
+    number_of_iterations = 2
 
-    number_of_gene_pools = 4
+    number_of_gene_pools = 2
 
     #=====================================================================================#
     gene_pools = []
@@ -700,7 +726,7 @@ def run_tests(debug=False):
             route_collection.set_cities(gene_pools[0].cities)
 
         # now evolve the routes to find a good one
-        route_collection.evolve_routes()
+        route_collection.evolve_routes(debug=debug)
 
         # now add it to the list
         gene_pools.append(route_collection)
@@ -733,9 +759,7 @@ def run_tests(debug=False):
             you_can_break_here = True
 
     # now evolve the routes after the gene pool leak
-    new_route_collection.evolve_routes()
-
-    # timer because it's a long process!!
+    new_route_collection.evolve_routes(debug=debug)
     print("Leaving",
           function_name,
           "and the process took",
@@ -746,7 +770,7 @@ def run_tests(debug=False):
 
 if __name__ == '__main__':
 
-    debug = True
+    debug = False
 
     # just make sure that the random numbers generate
     # consistently for testing purposes

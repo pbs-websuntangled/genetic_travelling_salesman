@@ -51,12 +51,13 @@ class Route_collection:
         self.create_routes()
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def create_cities(self):
+    def create_cities(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "create_cities"
@@ -68,7 +69,8 @@ class Route_collection:
         self.cities = np.random.choice(self.country_size, shape)
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
@@ -87,12 +89,13 @@ class Route_collection:
         self.create_routes()
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def evolve_routes(self):
+    def evolve_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "evolve_routes"
@@ -142,12 +145,13 @@ class Route_collection:
         self.create_video()
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def evaluate_routes(self):
+    def evaluate_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "evaluate_routes"
@@ -188,12 +192,13 @@ class Route_collection:
                 position = position + 1
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def kill_weakest_routes(self):
+    def kill_weakest_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "kill_weakest_routes"
@@ -226,7 +231,8 @@ class Route_collection:
         number_of_routes_killed = self.number_of_routes - len(new_routes)
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
@@ -234,7 +240,7 @@ class Route_collection:
         # and out of here
         return number_of_routes_killed
 
-    def mutate_routes(self):
+    def mutate_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "mutate_routes"
@@ -279,7 +285,8 @@ class Route_collection:
                 return
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
@@ -287,7 +294,7 @@ class Route_collection:
         # and out of here
         return
 
-    def procreate_routes(self):
+    def procreate_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "procreate_routes"
@@ -311,12 +318,13 @@ class Route_collection:
             self.routes.append(child_route)
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def create_routes(self):
+    def create_routes(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "create_routes"
@@ -339,12 +347,13 @@ class Route_collection:
         self.routes = routes
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def write_provenance(self):
+    def write_provenance(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "create_routes"
@@ -366,12 +375,13 @@ class Route_collection:
             the_file.write(self.routes[0].provenance)
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def create_video(self):
+    def create_video(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "create_video"
@@ -458,12 +468,13 @@ class Route_collection:
         you_can_break_here = True
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def plot_progress(self):
+    def plot_progress(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "plot_progress"
@@ -561,12 +572,13 @@ class Route_collection:
         self.plots.append(plot_to_save)
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
 
-    def plot_cities(self):
+    def plot_cities(self, debug=False):
 
         # start a timer because it's a long process!!
         start_time, function_name = time.time(), "plot_cities"
@@ -616,7 +628,8 @@ class Route_collection:
         plt.close('all')
 
         # timer because it's a long process!!
-        print("Leaving",
+        if debug: 
+            print("Leaving",
               function_name,
               "and the process took",
               time.time() - start_time)
@@ -694,7 +707,8 @@ def run_tests(debug=False):
     new_sales_agent.evolve_routes()
 
     # timer because it's a long process!!
-    print("Leaving",
+    if debug: 
+        print("Leaving",
           function_name,
           "and the process took",
           time.time() - start_time)

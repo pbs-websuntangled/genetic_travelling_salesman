@@ -8,11 +8,12 @@ from utils import calculate_rout_distance
 
 class Route:
 
-    def __init__(self, cities):
+    def __init__(self, cities, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "__init__" + "Route"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "__init__" + "Route"
+            print("Starting", function_name)
 
         # save the cities
         self.cities = cities
@@ -38,19 +39,21 @@ class Route:
         self.route[0] = 0
 
         # calculate the distance
-        self.calculate_distance()
+        self.calculate_distance(debug=debug)
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
-    def calculate_distance(self):
+    def calculate_distance(self, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "calculate_distance"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "calculate_distance"
+            print("Starting", function_name)
 
         # go through and calculate the distance
         distance = 0
@@ -93,19 +96,21 @@ class Route:
         distance = distance + distance_step
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         self.distance = distance
 
-    def mutate_route(self, number_of_city_pairs_to_swap):
+    def mutate_route(self, number_of_city_pairs_to_swap, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "mutate_route"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "mutate_route"
+            print("Starting", function_name)
 
         # Randomly swaps n pairs of cities in a copy of the
         # route and returns that copy to the caller
@@ -131,16 +136,17 @@ class Route:
             copy_of_route.route[city_indices[mutation_index][1]] = swapper
 
         # now recalculate the distance for that mutated route
-        copy_of_route.calculate_distance()
+        copy_of_route.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
         self.provenance = self.provenance + "Mutation,"
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         return copy_of_route
@@ -157,9 +163,10 @@ class Route:
         #   an array of the chained cities to insert
         #   an array of all the cities contained anywhere in a chain
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "get_procreation_insertions"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "get_procreation_insertions"
+            print("Starting", function_name)
 
         # calculate how many insertions there will be
         # let's have a minimum of 2
@@ -213,19 +220,21 @@ class Route:
             you_can_break_here = True
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         return procreation_insertions, procreation_insertion_firsts, procreation_inserted_cities
 
-    def procreate_route(self, partner):
+    def procreate_route(self, partner, debug=False):
 
-        # start a timer because it's a long process!!
-        start_time, function_name = time.time(), "procreate_route"
-        print("Starting", function_name)
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "procreate_route"
+            print("Starting", function_name)
 
         # Takes segments from the self route and inserts them into
         # a copy of the partner route
@@ -322,7 +331,7 @@ class Route:
         child.route = np.asarray(new_route)
 
         # now recalculate the distance for that child route
-        child.calculate_distance()
+        child.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
         child.provenance = mother.provenance + provenance
@@ -332,10 +341,11 @@ class Route:
             you_can_break_here = True
 
         # timer because it's a long process!!
-        print("Leaving",
-              function_name,
-              "and the process took",
-              time.time() - start_time)
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
 
         # and out of here
         return child
@@ -343,9 +353,10 @@ class Route:
 
 def run_tests(debug=False):
 
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "run_tests"
-    print("Starting", function_name)
+    if debug:
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "run_tests"
+        print("Starting", function_name)
 
     # set the return code
     return_code = 0
@@ -374,7 +385,7 @@ def run_tests(debug=False):
 
     # test route mutation
     # 300 should leave it 0,2,1 which is swapped
-    mutated_route = route.mutate_route(300)
+    mutated_route = route.mutate_route(300, debug=debug)
 
     # did the test work?
     if mutated_route.route[1] != route.route[1]:
@@ -408,10 +419,11 @@ def run_tests(debug=False):
     child = father.procreate_route(mother)
 
     # timer because it's a long process!!
-    print("Leaving",
-          function_name,
-          "and the process took",
-          time.time() - start_time)
+    if debug:
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
 
     # and out of here
 

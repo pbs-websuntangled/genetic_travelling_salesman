@@ -9,9 +9,10 @@ from imutils.video import VideoStream
 
 def create_video(debug=False):
 
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "plt_to_numpy_array"
-    print("Starting", function_name)
+    if debug:
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "plt_to_numpy_array"
+        print("Starting", function_name)
 
     # initialize the video stream and allow the camera
     # sensor to warmup
@@ -71,9 +72,10 @@ def create_video(debug=False):
 
 def plt_to_numpy_array(plt, debug=False):
 
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "plt_to_numpy_array"
-    print("Starting", function_name)
+    if debug:
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "plt_to_numpy_array"
+        print("Starting", function_name)
 
     # set up the filename to save the histogram
     filenameToUse = "__random_" + str(int(np.random.rand() * 1000000000))
@@ -89,11 +91,12 @@ def plt_to_numpy_array(plt, debug=False):
     os.remove(os.path.join('outputNoGit',
                            filenameToUse + "__deleteThis_y.png"))
 
-    # timer because it's a long process!!
-    print("Leaving",
-          function_name,
-          "and the process took",
-          time.time() - start_time)
+    if debug:
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
 
     return tempImage
 
@@ -124,9 +127,10 @@ def figure_to_numpy(figure):
 
 def calculate_rout_distance(route, cities, debug=False):
 
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "calculate_rout_distance"
-    print("Starting", function_name)
+    if debug:
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "calculate_rout_distance"
+        print("Starting", function_name)
 
     # go through and calculate the distance
     distance = 0
@@ -163,11 +167,12 @@ def calculate_rout_distance(route, cities, debug=False):
     # accumulate the distance
     distance = distance + distance_step
 
-    # timer because it's a long process!!
-    print("Leaving",
-          function_name,
-          "and the process took",
-          time.time() - start_time)
+    if debug:
+        # timer because it's a long process!!
+        print("Leaving",
+              function_name,
+              "and the process took",
+              time.time() - start_time)
 
     # and out of here
     return distance
@@ -175,9 +180,10 @@ def calculate_rout_distance(route, cities, debug=False):
 
 def run_tests(debug=False):
 
-    # start a timer because it's a long process!!
-    start_time, function_name = time.time(), "run_tests"
-    print("Starting", function_name)
+    if debug:
+        # start a timer because it's a long process!!
+        start_time, function_name = time.time(), "run_tests"
+        print("Starting", function_name)
 
     # set the return code
     return_code = 0
