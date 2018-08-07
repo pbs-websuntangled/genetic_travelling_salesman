@@ -24,6 +24,9 @@ class Route_collection:
         self.start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
         self.start_time = time.time()
 
+        # set the video parameters
+        self.create_video_parameters()
+
         # save the name
         self.name = name
 
@@ -85,6 +88,26 @@ class Route_collection:
 
         # create a plot of all the cities with no routes
         self.plot_cities(debug=debug)
+
+        # timer because it's a long process!!
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
+
+    def create_video_parameters(self, debug=False):
+
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "create_video_parameters"
+            print("Starting", function_name)
+
+        # create the parameters
+        self.video_parameters = {}
+        self.video_parameters["shape"] = (1080, 1920)
+        self.video_parameters["fourcc"] = cv2.VideoWriter_fourcc(*"MJPG")
+        self.video_parameters["frames_per_second"] = 20
 
         # timer because it's a long process!!
         if debug:
@@ -464,29 +487,23 @@ class Route_collection:
         filename_to_use = os.path.join("outputNoGit", filename_to_use)
 
         # initialize the FourCC, video writer, dimensions of the frame, and
-        # zeros array
-        fourcc = cv2.VideoWriter_fourcc(*"DIVX")
-        fourcc = cv2.VideoWriter_fourcc(*"H264")  # doesn't work
-        fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-        frames_per_second = 20
         writer = None
-
-        frame = self.plots[0]  # for sizing some artefacts
+        frame = plots[0]  # for sizing some artefacts
 
         # check if the writer is None
         if writer is None:
             # store the image dimensions, initialzie the video writer,
             # and construct the zeros array
             (h, w) = frame.shape[:2]
-            writer = cv2.VideoWriter(filename_to_use, fourcc, frames_per_second,
+            writer = cv2.VideoWriter(filename_to_use, self.video_parameters["fourcc"], self.video_parameters["frames_per_second"],
                                      (w, h), True)
             zeros = np.zeros((h, w), dtype="uint8")
 
         # write the plots to the video file
         fade_seconds = 1
-        fade_factor = frames_per_second * fade_seconds
+        fade_factor = self.video_parameters["frames_per_second"] * fade_seconds
 
-        for plot_index, plot in enumerate(self.plots):
+        for plot_index, plot in enumerate(plots):
 
             if plot_index == 0:
 
@@ -513,7 +530,7 @@ class Route_collection:
                 continue
 
             # say what the previous one was so I can fade it out
-            plot_previous = self.plots[plot_index - 1]
+            plot_previous = plots[plot_index - 1]
 
             # create a fade
             for factor in range(fade_factor):
@@ -561,6 +578,21 @@ class Route_collection:
             x.append(self.cities[city_index][0])
             y.append(self.cities[city_index][1])
 
+        # calculate the plot scale factor by working out
+        # how many genepools to stack on top of each other
+        # and how tall they can be to fit in the video height
+        video_height = self.video_parameters["shape"][0]
+
+        # get the standard plot height
+        # get a reference to the current fgure
+        standard_plot_height = plt.gcf().bbox.height
+
+        # get the scale factor needed to fit the plots on top of each other
+        # but do't scale them up
+        scale_factor = self.number_of_super_iterations * \
+            standard_plot_height / video_height
+        scale_factor = min(1, scale_factor)
+
         # start a figure
         plt.figure()
 
@@ -582,13 +614,15 @@ class Route_collection:
         plt.axis('off')
 
         # turn the figure into a numpy array
-        route_figure_as_array = plt_to_numpy_array(plt, scale_factor=0.5)
+        route_figure_as_array = plt_to_numpy_array(plt, scale_factor)
 
         # finish that one
         plt.close('all')
 
         # start a new figure
         plt.figure()
+
+        plt.title(self.name)
 
         # set the axes
         axes = plt.gca()
@@ -610,7 +644,7 @@ class Route_collection:
         plt.scatter(0, self.distances[-1], c="green", s=400)
 
         # turn the figure into a numpy array
-        progress_figure_as_array = plt_to_numpy_array(plt, scale_factor=0.5)
+        progress_figure_as_array = plt_to_numpy_array(plt, scale_factor)
 
         # put them side by side
         plot_to_save = np.hstack(
@@ -716,10 +750,10 @@ def run_tests(debug=False):
     number_of_cities = 25
     number_of_routes = 400
     # 25 cities needs 90 iterations
-    number_of_super_iterations = 2
-    number_of_iterations = 3
+    number_of_super_iterations = 10
+    number_of_iterations = 100
 
-    number_of_gene_pools = 2
+    number_of_gene_pools = 4
 
     #=====================================================================================#
     # first create all the gene pools with the cloned cities in all of them
