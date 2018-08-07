@@ -247,10 +247,10 @@ class Route:
             mother = partner
             father = self
 
-        # half of the time, reverse the mother
+        # 1/3rd of the time, reverse the mother
         # to create more diversity
         reverser_decider_mother = np.random.rand()
-        if reverser_decider_mother > 0.5:
+        if reverser_decider_mother > 0.6666:
 
             # and do a deep copy before the reverse so we don't
             # alter the gene pool
@@ -262,9 +262,9 @@ class Route:
             mother.route[1:] = (mother.route[1:])[::-1]
         else:  # the mother is not reversed
             # if the mother wasn't reversed,
-            # half the time reverse the father
+            # 1/3rd the time reverse the father
             reverser_decider_father = np.random.rand()
-            if reverser_decider_father > 0.5:
+            if reverser_decider_father > 0.6666:
 
                 # and do a deep copy before the reverse so we don't
                 # alter the gene pool

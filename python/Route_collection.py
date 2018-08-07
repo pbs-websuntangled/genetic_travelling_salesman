@@ -292,11 +292,13 @@ class Route_collection:
                 # unless it has fitness of 1
                 if (self.diversity[-1] > diversity_checks[route_index]) or (route.fitness == 1):
 
-                    # this route survives!!
-                    new_routes.append(self.routes[route_index])
+                    # increase the diversity by refusing multiple copies of the same route
+                    if self.routes[route_index] not in new_routes:
+                        # this route survives!!
+                        new_routes.append(self.routes[route_index])
 
-                    # update the provenenace
-                    new_routes[-1].provenance.append("Survivor")
+                        # update the provenenace
+                        new_routes[-1].provenance.append("Survivor")
 
         # have I destroyed all the routes!!
         # it really should be impossible as the fittest route
@@ -816,10 +818,13 @@ def run_tests(debug=False):
     number_of_cities = 70
     number_of_routes = 400
     # 25 cities needs 90 iterations
+
     number_of_super_iterations = 10
-
     number_of_iterations = 200
+    number_of_gene_pools = 4
 
+    number_of_super_iterations = 2
+    number_of_iterations = 3
     number_of_gene_pools = 4
 
     #=====================================================================================#
