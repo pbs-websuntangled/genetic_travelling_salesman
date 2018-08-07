@@ -22,7 +22,7 @@ class Route:
         self.fitness = ""
 
         # create slot for provenance
-        self.provenance = ""
+        self.provenance = []
 
         # generate the random route
         # home city is always 0
@@ -139,7 +139,7 @@ class Route:
         copy_of_route.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
-        self.provenance = self.provenance + "Mutation, "
+        copy_of_route.provenance.append("Mutation")
 
         # timer because it's a long process!!
         if debug:
@@ -334,7 +334,7 @@ class Route:
         child.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
-        child.provenance = child.provenance + provenance
+        child.provenance.append(provenance)
 
         # allow break if it's not correct length
         if child.route.shape[0] != self.number_of_cities:

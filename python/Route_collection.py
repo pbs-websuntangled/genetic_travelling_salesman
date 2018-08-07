@@ -36,7 +36,7 @@ class Route_collection:
         # save the number of routes
         self.number_of_routes = number_of_routes
 
-        # save the number of geen_pools
+        # save the number of gene_pools
         self.number_of_gene_pools = number_of_gene_pools
 
         # save the number of super_iterations
@@ -56,7 +56,7 @@ class Route_collection:
         # create a slot for the standard deviations of the routes at each iteration
         # used for creating a measure of the route population diversity
         self.standard_deviations = []
-        self.diversities = []
+        self.diversity = []
 
         # create a holder to show progress of distance
         self.distances = []
@@ -66,6 +66,9 @@ class Route_collection:
 
         # generate the initial pool of random routes
         self.create_routes(debug=debug)
+
+        # reset the seed
+        np.random.seed()
 
         # timer because it's a long process!!
         if debug:
@@ -219,8 +222,8 @@ class Route_collection:
             self.routes[0].distance
         delta_bottom = self.routes[-1].distance - \
             self.routes[index_of_median].distance
-        self.diversities.append(min(delta_top, delta_bottom) /
-                                max(delta_top, delta_bottom))
+        self.diversity.append(min(delta_top, delta_bottom) /
+                              max(delta_top, delta_bottom))
 
         if self.range_of_distances != 0:
 
@@ -287,14 +290,13 @@ class Route_collection:
 
                 # now it has to survive the diversity check as well
                 # unless it has fitness of 1
-                if (self.diversities[-1] > diversity_checks[route_index]) or (route.fitness == 1):
+                if (self.diversity[-1] > diversity_checks[route_index]) or (route.fitness == 1):
 
                     # this route survives!!
                     new_routes.append(self.routes[route_index])
 
                     # update the provenenace
-                    new_routes[-1].provenance = new_routes[-1].provenance + \
-                        "Survivor, "
+                    new_routes[-1].provenance.append("Survivor")
 
         # have I destroyed all the routes!!
         # it really should be impossible as the fittest route
@@ -353,8 +355,15 @@ class Route_collection:
                                           maximum_mutations_per_route * (1 - self.routes[route_index].fitness)))
 
             # if the diversity is low, then we need more mutations
-            number_of_mutations = int(
-                number_of_mutations / self.diversities[-1])
+            if self.diversity[-1] == 0:
+                # diversity is zero!!!!!
+                number_of_mutations = int(self.number_of_cities / 2)
+            else:
+                number_of_mutations = int(
+                    number_of_mutations / self.diversity[-1])
+
+                number_of_mutations = min(
+                    number_of_mutations, int(self.number_of_cities / 2))
 
             # create a copy and put it onto the  end of the list
             if len(self.routes) < self.number_of_routes:
@@ -388,11 +397,12 @@ class Route_collection:
         # create offspring
         #
         # how many children required?
-        self.number_of_children = int(self.number_survived / 2) - 1
+        self.number_of_children = int((self.number_of_routes -
+                                       self.number_survived) / 2) - 1
 
         # randomly choose parents from the fittest survivors
-        parents = np.random.choice(self.number_survived, self.number_of_children * 2,
-                                   replace=False)
+        parents = np.random.choice(
+            self.number_survived, self.number_of_children * 2)
 
         for child_index in range(self.number_of_children):
             parent_1 = self.routes[parents[child_index * 2]]
@@ -426,7 +436,7 @@ class Route_collection:
             route = Route(self.cities)
 
             # tell it where it came from
-            route.provenance = self.name + " number " + str(route_index) + ", "
+            route.provenance.append(self.name + " number " + str(route_index))
             routes.append(route)
 
         # and save them
@@ -443,7 +453,7 @@ class Route_collection:
 
         if debug:
             # start a timer because it's a long process!!
-            start_time, function_name = time.time(), "create_routes"
+            start_time, function_name = time.time(), "write_provenance"
             print("Starting", function_name)
 
         # create a filename
@@ -459,8 +469,9 @@ class Route_collection:
         filename_to_use = os.path.join("outputNoGit", filename_to_use)
 
         # write out the provenance
+        # do a comma seperated list
         with open(filename_to_use, 'a') as the_file:
-            the_file.write(self.routes[0].provenance)
+            the_file.write(",".join(self.routes[0].provenance))
 
         # timer because it's a long process!!
         if debug:
@@ -558,7 +569,7 @@ class Route_collection:
                   "and the process took",
                   time.time() - start_time)
 
-    def plot_progress(self, debug=False):
+    def plot_progress(self, save_images=False, debug=False):
 
         if debug:
             # start a timer because it's a long process!!
@@ -654,20 +665,22 @@ class Route_collection:
         plot_to_save = np.hstack(
             (progress_figure_as_array, route_figure_as_array))
 
-        # save the stacked image
-        filename_to_use = "__name_" + self.name +\
-            "__cities_" + str(self.number_of_cities) +\
-            "__routes_" + str(self.number_of_routes) + \
-            "__superIterations_" + str(self.number_of_super_iterations) +\
-            "__iterations_" + str(self.number_of_iterations) +\
-            "__distance_" + str(int(self.routes[0].distance)) +\
-            "__ipm_" + str(int(iterations_per_minute)) +\
-            "__type_combined" +\
-            "__superIteration_" + str(self.super_iteration_number) +\
-            "__iteration_" + str(self.iteration) +\
-            "__ts_" + str(self.start_time_formatted)
-        cv2.imwrite(os.path.join(
-            "plots", filename_to_use + ".png"), plot_to_save)
+        # save to disk if we need to
+        if save_images == True:
+            # save the stacked image
+            filename_to_use = "__name_" + self.name +\
+                "__cities_" + str(self.number_of_cities) +\
+                "__routes_" + str(self.number_of_routes) + \
+                "__superIterations_" + str(self.number_of_super_iterations) +\
+                "__iterations_" + str(self.number_of_iterations) +\
+                "__distance_" + str(int(self.routes[0].distance)) +\
+                "__ipm_" + str(int(iterations_per_minute)) +\
+                "__type_combined" +\
+                "__superIteration_" + str(self.super_iteration_number) +\
+                "__iteration_" + str(self.iteration) +\
+                "__ts_" + str(self.start_time_formatted)
+            cv2.imwrite(os.path.join(
+                "plots", filename_to_use + ".png"), plot_to_save)
 
         # clear out the plot
         plt.close('all')
@@ -740,6 +753,55 @@ class Route_collection:
                   "and the process took",
                   time.time() - start_time)
 
+    def plot_diversity(self, debug=False):
+
+        if debug:
+            # start a timer because it's a long process!!
+            start_time, function_name = time.time(), "plot_diversity"
+            print("Starting", function_name)
+
+        # Spits out a plot of the diversity
+
+        # create the x and y coordinates of thecities
+        # for plotting the current best route
+        x = []
+        y = []
+        for city in self.cities:
+            x.append(city[0])
+            y.append(city[1])
+
+        # start a figure
+        plt.figure()
+
+        # plot it
+        plt.plot(self.diversity)
+
+        # add the title
+        plt.title("Diversity of routes in:" + self.name)
+
+        # Create a meaningful filename
+        filename_to_use = "__name_" + self.name +\
+            "__cities_" + str(self.number_of_cities) +\
+            "__routes_" + str(self.number_of_routes) + \
+            "__superIterations_" + str(self.number_of_super_iterations) +\
+            "__iterations_" + str(self.number_of_iterations) +\
+            "__type_diversity" +\
+            "__ts_" + str(self.start_time_formatted)
+
+        # save the file
+        plt.savefig(os.path.join('outputNoGit',
+                                 filename_to_use + ".png"))
+
+        # finish that one
+        plt.close('all')
+
+        # timer because it's a long process!!
+        if debug:
+            print("Leaving",
+                  function_name,
+                  "and the process took",
+                  time.time() - start_time)
+
 
 def run_tests(debug=False):
 
@@ -755,7 +817,8 @@ def run_tests(debug=False):
     number_of_routes = 400
     # 25 cities needs 90 iterations
     number_of_super_iterations = 10
-    number_of_iterations = 100
+
+    number_of_iterations = 200
 
     number_of_gene_pools = 4
 
@@ -815,8 +878,7 @@ def run_tests(debug=False):
 
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
-                                 gene_pool_donor_index].provenance = recipient.routes[-1 -
-                                                                                      gene_pool_donor_index].provenance + "Leaked from " + donor.name + ", "
+                                 gene_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
 
     # We've done all the super iterations so make the videos
     for gene_pool_index in range(number_of_gene_pools):
@@ -826,6 +888,9 @@ def run_tests(debug=False):
 
         # now save the provenance
         gene_pool.write_provenance(debug=debug)
+
+        # plot the diversity
+        gene_pool.plot_diversity(debug=debug)
 
         # now make the video
         unique_name = "allSuperIterations"
