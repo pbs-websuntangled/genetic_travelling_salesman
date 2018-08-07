@@ -139,7 +139,7 @@ class Route:
         copy_of_route.calculate_distance(debug=debug)
 
         # update provenace to show it's come from a mutation
-        self.provenance = self.provenance + "Mutation,"
+        self.provenance = self.provenance + "Mutation, "
 
         # timer because it's a long process!!
         if debug:

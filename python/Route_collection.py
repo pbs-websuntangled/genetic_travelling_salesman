@@ -292,6 +292,10 @@ class Route_collection:
                     # this route survives!!
                     new_routes.append(self.routes[route_index])
 
+                    # update the provenenace
+                    new_routes[-1].provenance = new_routes[-1].provenance + \
+                        "Survivor, "
+
         # have I destroyed all the routes!!
         # it really should be impossible as the fittest route
         # has a health of 1
@@ -747,7 +751,7 @@ def run_tests(debug=False):
     return_code = 0
 
     # create a country
-    number_of_cities = 25
+    number_of_cities = 70
     number_of_routes = 400
     # 25 cities needs 90 iterations
     number_of_super_iterations = 10
