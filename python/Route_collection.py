@@ -275,9 +275,6 @@ class Route_collection:
 
         diversity_checks = np.random.rand(self.number_of_routes)
 
-        # how to make it kill more when the diversty is lower and less when it's higher?
-        #  - discount the fitness by the diversity factor in the loop
-
         # now check fitness against the dangers
         # kill if it's less
         # by not copying it over to new list
@@ -288,17 +285,13 @@ class Route_collection:
             danger = dangers[route_index]
             if danger <= route.fitness:
 
-                # now it has to survive the diversity check as well
-                # unless it has fitness of 1
-                if (self.diversity[-1] > diversity_checks[route_index]) or (route.fitness == 1):
+                # increase the diversity by refusing multiple copies of the same route
+                if self.routes[route_index] not in new_routes:
+                    # this route survives!!
+                    new_routes.append(self.routes[route_index])
 
-                    # increase the diversity by refusing multiple copies of the same route
-                    if self.routes[route_index] not in new_routes:
-                        # this route survives!!
-                        new_routes.append(self.routes[route_index])
-
-                        # update the provenenace
-                        new_routes[-1].provenance.append("Survivor")
+                    # update the provenenace
+                    new_routes[-1].provenance.append("Survivor")
 
         # have I destroyed all the routes!!
         # it really should be impossible as the fittest route
@@ -336,7 +329,7 @@ class Route_collection:
         # within that one journey
 
         # what's the maximum number of mutations per route
-        maximum_mutations_per_route = max(2, int(0.1 * self.number_of_cities))
+        maximum_mutations_per_route = max(2, int(1 * self.number_of_cities))
         minimum_mutatations_per_route = 1
 
         # generate the random route indices to mutate to get to the correct number of routes
@@ -345,27 +338,17 @@ class Route_collection:
             self.number_survived - self.number_of_children
         indices_to_mutate = np.random.choice(
             self.number_survived, self.number_of_mutations)
+        possible_number_of_mutations_for_this_route = range(
+            minimum_mutatations_per_route, maximum_mutations_per_route)
 
         for route_index in indices_to_mutate:
 
             route = self.routes[route_index]
 
             # first let's choose an amount of mutations
-            # there will be a minimum and a maximum with inbetweens a
-            # function of the inverse fitness
-            number_of_mutations = int(max(minimum_mutatations_per_route,
-                                          maximum_mutations_per_route * (1 - self.routes[route_index].fitness)))
-
-            # if the diversity is low, then we need more mutations
-            if self.diversity[-1] == 0:
-                # diversity is zero!!!!!
-                number_of_mutations = int(self.number_of_cities / 2)
-            else:
-                number_of_mutations = int(
-                    number_of_mutations / self.diversity[-1])
-
-                number_of_mutations = min(
-                    number_of_mutations, int(self.number_of_cities / 2))
+            # there will be a minimum and a maximum
+            number_of_mutations = np.random.choice(
+                possible_number_of_mutations_for_this_route)
 
             # create a copy and put it onto the  end of the list
             if len(self.routes) < self.number_of_routes:
@@ -780,6 +763,8 @@ class Route_collection:
 
         # add the title
         plt.title("Diversity of routes in:" + self.name)
+        plt.xlabel('Iterations of evolutionary cycle')
+        plt.ylabel('Diversity')
 
         # Create a meaningful filename
         filename_to_use = "__name_" + self.name +\
@@ -816,17 +801,24 @@ def run_tests(debug=False):
 
     # create a country
     number_of_cities = 70
-    number_of_routes = 400
+
+    # 400 took 142 seconds
+    # 200 took 90  seconds
+    number_of_routes = 2000
+
     # 25 cities needs 90 iterations
 
-    number_of_super_iterations = 10
-    number_of_iterations = 200
-    number_of_gene_pools = 4
+    number_of_gene_pools = 3
+    number_of_super_iterations = 3
+    number_of_iterations = 100
+    number_of_gene_pools = 3
 
-    number_of_super_iterations = 2
-    number_of_iterations = 3
-    number_of_gene_pools = 4
-
+    # print out the key variables
+    print("number_of_cities", number_of_cities)
+    print("number_of_routes", number_of_routes)
+    print("number_of_super_iterations", number_of_super_iterations)
+    print("number_of_gene_pools", number_of_gene_pools)
+    print("number_of_iterations", number_of_iterations)
     #=====================================================================================#
     # first create all the gene pools with the cloned cities in all of them
     gene_pools = []
@@ -850,15 +842,31 @@ def run_tests(debug=False):
         # creata a possible break point
         you_can_break_here = True
 
-    for super_iteration_index in enumerate(range(number_of_super_iterations)):
+    # holder for lowest route found so far
+    # it's ok to use any of the routes found so far
+    lowest_route_found_so_far = gene_pools[0].routes[0].distance
+
+    for super_iteration_index in range(number_of_super_iterations):
+
+        # give a status update
+        print("Starting super iteration", super_iteration_index + 1, "of",
+              number_of_super_iterations, "at", time.strftime("%Y%m%d-%H%M%S"))
 
         for gene_pool_index in range(number_of_gene_pools):
+
+            # give a status update
+            print("    Starting gene_pool", gene_pool_index + 1, "of",
+                  number_of_gene_pools, "at", time.strftime("%Y%m%d-%H%M%S"))
 
             # pull the route collection out of the gene pool
             route_collection = gene_pools[gene_pool_index]
 
             # now evolve the routes to find a good one
             route_collection.evolve_routes(debug=debug)
+
+            # get the shortest route found
+            lowest_route_found_so_far = min(
+                lowest_route_found_so_far, route_collection.distances[-1])
 
         # right now we've been round all the gene pools, leak
         # the genes of the best routes to all the gene pools
@@ -884,6 +892,10 @@ def run_tests(debug=False):
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
                                  gene_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
+
+        # give a status update
+        print("    Ending super iteration, shortest route so far:",
+              int(lowest_route_found_so_far))
 
     # We've done all the super iterations so make the videos
     for gene_pool_index in range(number_of_gene_pools):

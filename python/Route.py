@@ -273,7 +273,7 @@ class Route:
                 # set the provenance
                 provenance = "Child Father Reversed, "
 
-            else:  # neither the fater nor the mother are reversed
+            else:  # 1/3rd of the time, neither parent is reversed
 
                 # set the provenance
                 provenance = "Child, "
