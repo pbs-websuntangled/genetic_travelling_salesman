@@ -640,8 +640,20 @@ class Route_collection:
         plt.plot(self.distances, color='k',
                  linestyle='-', linewidth=2)
 
+        # plot the vertical lines at route leakage points
+        for iteration_index in range(self.number_of_iterations, self.number_of_super_iterations * self.number_of_iterations, self.number_of_iterations):
+            plot_this_x = (iteration_index - 0.00001,
+                           iteration_index)
+            plot_this_y = (0, 1)
+            plt.plot(plot_this_x, plot_this_y, c="orange")
+            print("plot_this_x", plot_this_x)
+            print("plot_this_y", plot_this_y)
+
         # put a colourful dot on the beginning of the line
-        plt.scatter(0, self.distances[-1], c="green", s=400)
+        plt.scatter(0, self.distances[-1], c="green", s=200)
+
+        # put a colourful dot at the bottom axis at where we are
+        plt.scatter(len(self.distances, 0), c="green", s=200)
 
         # turn the figure into a numpy array
         progress_figure_as_array = plt_to_numpy_array(plt, scale_factor)
@@ -761,6 +773,15 @@ class Route_collection:
         # plot it
         plt.plot(self.diversity)
 
+        # plot the vertical lines at route leakage points
+        for iteration_index in range(self.number_of_iterations, self.number_of_super_iterations * self.number_of_iterations, self.number_of_iterations):
+            plot_this_x = (iteration_index - 0.00001,
+                           iteration_index)
+            plot_this_y = (0, 1)
+            plt.plot(plot_this_x, plot_this_y, c="orange")
+            print("plot_this_x", plot_this_x)
+            print("plot_this_y", plot_this_y)
+
         # add the title
         plt.title("Diversity of routes in:" + self.name)
         plt.xlabel('Iterations of evolutionary cycle')
@@ -808,17 +829,16 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_gene_pools = 3
+    number_of_gene_pools = 2
     number_of_super_iterations = 3
-    number_of_iterations = 100
-    number_of_gene_pools = 3
+    number_of_iterations = 20
 
     # print out the key variables
-    print("number_of_cities", number_of_cities)
-    print("number_of_routes", number_of_routes)
-    print("number_of_super_iterations", number_of_super_iterations)
-    print("number_of_gene_pools", number_of_gene_pools)
-    print("number_of_iterations", number_of_iterations)
+    print("number_of_cities =", number_of_cities)
+    print("number_of_routes =", number_of_routes)
+    print("number_of_super_iterations =", number_of_super_iterations)
+    print("number_of_gene_pools =", number_of_gene_pools)
+    print("number_of_iterations =", number_of_iterations)
     #=====================================================================================#
     # first create all the gene pools with the cloned cities in all of them
     gene_pools = []
@@ -892,6 +912,9 @@ def run_tests(debug=False):
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
                                  gene_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
+
+                print("Leaking and number of iterations is:",
+                      len(donor.distances))
 
         # give a status update
         print("    Ending super iteration, shortest route so far:",

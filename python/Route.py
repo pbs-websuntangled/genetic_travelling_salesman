@@ -257,7 +257,7 @@ class Route:
             mother = copy.deepcopy(mother)
 
             # set the provenance
-            provenance = "Child Mother Reversed, "
+            provenance = "Child Mother Reversed"
 
             mother.route[1:] = (mother.route[1:])[::-1]
         else:  # the mother is not reversed
@@ -271,12 +271,12 @@ class Route:
                 father = copy.deepcopy(father)
 
                 # set the provenance
-                provenance = "Child Father Reversed, "
+                provenance = "Child Father Reversed"
 
             else:  # 1/3rd of the time, neither parent is reversed
 
                 # set the provenance
-                provenance = "Child, "
+                provenance = "Child"
 
                 father.route[1:] = (mother.route[1:])[::-1]
 

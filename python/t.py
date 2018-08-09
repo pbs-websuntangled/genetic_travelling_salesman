@@ -4,6 +4,10 @@ import sys
 
 test = sys.maxsize
 
+for index in range(0, 10, 2):
+    print(index)
+
+
 # start a new figure
 plt.figure()
 
