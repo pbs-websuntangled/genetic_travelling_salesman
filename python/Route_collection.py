@@ -13,7 +13,7 @@ from Route import Route
 
 class Route_collection:
 
-    def __init__(self, name, number_of_cities, number_of_routes, number_of_super_iterations, number_of_iterations, super_iteration_number=0, number_of_gene_pools=1, debug=False):
+    def __init__(self, name, number_of_cities, number_of_routes, number_of_super_iterations, number_of_iterations, super_iteration_number=0, number_of_route_pools=1, debug=False):
 
         if debug:
             # start a timer because it's a long process!!
@@ -36,8 +36,8 @@ class Route_collection:
         # save the number of routes
         self.number_of_routes = number_of_routes
 
-        # save the number of gene_pools
-        self.number_of_gene_pools = number_of_gene_pools
+        # save the number of route_pools
+        self.number_of_route_pools = number_of_route_pools
 
         # save the number of super_iterations
         self.number_of_super_iterations = number_of_super_iterations
@@ -562,7 +562,7 @@ class Route_collection:
             print("Starting", function_name)
 
         # Spits out a graph of the progress and the current best route
-        # horizntally stacked
+        # horizontally stacked
         # So that a gif or animation of the development pf the route can be built
 
         # check how fast I am going by including the
@@ -570,7 +570,7 @@ class Route_collection:
         iterations_per_minute = int(
             self.iteration / ((time.time() - self.start_time) / 60))
 
-        # create the x and y coordinates of thecities
+        # create the x and y coordinates of the cities
         # for plotting the current best route
         x = []
         y = []
@@ -600,13 +600,17 @@ class Route_collection:
         home_city = self.routes[0].route[0]
         last_city = self.routes[0].route[-1]
 
+        # Mark the home and final city on the map
         plt.scatter(x[0], y[0], c="red", s=500)
         plt.scatter(x[-1], y[-1], c="green", s=150)
 
+        # Mark all the intermediate cities on the map
         plt.scatter(x[1:-1],  y[1:-1], c="blue", s=100)
 
+        # mark the route on the map
         plt.plot(x, y, color='k', linestyle='-', linewidth=2)
 
+        # And a title
         plt.title(str(self.number_of_cities) + " City locations and best route so far\n (distance: " +
                   str(int(self.distances[-1])) + ")")
 
@@ -629,7 +633,7 @@ class Route_collection:
         x_minimum = 0
         x_maximum = self.number_of_iterations * self.number_of_super_iterations - 1
         y_minimum = 0
-        y_maximum = self.distances[0] * 1.05
+        y_maximum = self.distances[0] * 1.1
         axes.set_xlim([x_minimum, x_maximum])
         axes.set_ylim([y_minimum, y_maximum])
 
@@ -642,18 +646,29 @@ class Route_collection:
 
         # plot the vertical lines at route leakage points
         for iteration_index in range(self.number_of_iterations, self.number_of_super_iterations * self.number_of_iterations, self.number_of_iterations):
+
+            # only go as far as the itrations already done
+            if iteration_index >= len(self.distances):
+                break
+
             plot_this_x = (iteration_index - 0.00001,
                            iteration_index)
-            plot_this_y = (0, 1)
+            try:
+                plot_this_y = (
+                    0, self.distances[iteration_index] + 0.02 * self.distances[0])
+            except:
+                you_can_break_here = True
+
             plt.plot(plot_this_x, plot_this_y, c="orange")
-            print("plot_this_x", plot_this_x)
-            print("plot_this_y", plot_this_y)
+
+            plt.annotate('Route \npool \nLeakage', xy=(
+                0.5, 0.5), xytext=(iteration_index, 0.025 * self.distances[0] + self.distances[iteration_index]))
 
         # put a colourful dot on the beginning of the line
         plt.scatter(0, self.distances[-1], c="green", s=200)
 
         # put a colourful dot at the bottom axis at where we are
-        plt.scatter(len(self.distances, 0), c="green", s=200)
+        plt.scatter(len(self.distances), 0, c="green", s=200)
 
         # turn the figure into a numpy array
         progress_figure_as_array = plt_to_numpy_array(plt, scale_factor)
@@ -770,6 +785,15 @@ class Route_collection:
         # start a figure
         plt.figure()
 
+        # set the axes
+        axes = plt.gca()
+        x_minimum = 0
+        x_maximum = self.number_of_iterations * self.number_of_super_iterations - 1
+        y_minimum = 0
+        y_maximum = 1.05
+        axes.set_xlim([x_minimum, x_maximum])
+        axes.set_ylim([y_minimum, y_maximum])
+
         # plot it
         plt.plot(self.diversity)
 
@@ -777,10 +801,11 @@ class Route_collection:
         for iteration_index in range(self.number_of_iterations, self.number_of_super_iterations * self.number_of_iterations, self.number_of_iterations):
             plot_this_x = (iteration_index - 0.00001,
                            iteration_index)
-            plot_this_y = (0, 1)
+            plot_this_y = (0, 0.02 + self.diversity[iteration_index])
             plt.plot(plot_this_x, plot_this_y, c="orange")
-            print("plot_this_x", plot_this_x)
-            print("plot_this_y", plot_this_y)
+
+            plt.annotate('Route \npool \nLeakage', xy=(
+                0.5, 0.5), xytext=(iteration_index, 0.025 + self.diversity[iteration_index]))
 
         # add the title
         plt.title("Diversity of routes in:" + self.name)
@@ -829,23 +854,23 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_gene_pools = 2
+    number_of_route_pools = 2
     number_of_super_iterations = 3
-    number_of_iterations = 20
+    number_of_iterations = 2
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
     print("number_of_routes =", number_of_routes)
     print("number_of_super_iterations =", number_of_super_iterations)
-    print("number_of_gene_pools =", number_of_gene_pools)
+    print("number_of_route_pools =", number_of_route_pools)
     print("number_of_iterations =", number_of_iterations)
     #=====================================================================================#
     # first create all the gene pools with the cloned cities in all of them
-    gene_pools = []
-    for gene_pool_index in range(number_of_gene_pools):
+    route_pools = []
+    for route_pool_index in range(number_of_route_pools):
 
         # generate the name
-        name = "gene_pool_" + str(gene_pool_index)
+        name = "route_pool_" + str(route_pool_index)
 
         # create the route collection
         route_collection = Route_collection(name,
@@ -853,18 +878,18 @@ def run_tests(debug=False):
 
         # copy the cities from the 1st route collection
         # and populate all the routes with thise cities
-        if gene_pool_index > 0:
-            route_collection.set_cities(gene_pools[0].cities)
+        if route_pool_index > 0:
+            route_collection.set_cities(route_pools[0].cities)
 
         # now add it to the list
-        gene_pools.append(route_collection)
+        route_pools.append(route_collection)
 
         # creata a possible break point
         you_can_break_here = True
 
     # holder for lowest route found so far
     # it's ok to use any of the routes found so far
-    lowest_route_found_so_far = gene_pools[0].routes[0].distance
+    lowest_route_found_so_far = route_pools[0].routes[0].distance
 
     for super_iteration_index in range(number_of_super_iterations):
 
@@ -872,14 +897,14 @@ def run_tests(debug=False):
         print("Starting super iteration", super_iteration_index + 1, "of",
               number_of_super_iterations, "at", time.strftime("%Y%m%d-%H%M%S"))
 
-        for gene_pool_index in range(number_of_gene_pools):
+        for route_pool_index in range(number_of_route_pools):
 
             # give a status update
-            print("    Starting gene_pool", gene_pool_index + 1, "of",
-                  number_of_gene_pools, "at", time.strftime("%Y%m%d-%H%M%S"))
+            print("    Starting route_pool", route_pool_index + 1, "of",
+                  number_of_route_pools, "at", time.strftime("%Y%m%d-%H%M%S"))
 
             # pull the route collection out of the gene pool
-            route_collection = gene_pools[gene_pool_index]
+            route_collection = route_pools[route_pool_index]
 
             # now evolve the routes to find a good one
             route_collection.evolve_routes(debug=debug)
@@ -890,28 +915,28 @@ def run_tests(debug=False):
 
         # right now we've been round all the gene pools, leak
         # the genes of the best routes to all the gene pools
-        for gene_pool_recipient_index in range(number_of_gene_pools):
+        for route_pool_recipient_index in range(number_of_route_pools):
 
             # set up the recipient
-            recipient = gene_pools[gene_pool_recipient_index]
+            recipient = route_pools[route_pool_recipient_index]
 
             # now round the donors
-            for gene_pool_donor_index in range(number_of_gene_pools):
+            for route_pool_donor_index in range(number_of_route_pools):
 
                 # don't donate to yourself
-                if gene_pool_donor_index == gene_pool_recipient_index:
+                if route_pool_donor_index == route_pool_recipient_index:
                     continue
 
                 # set up the donor
-                donor = gene_pools[gene_pool_donor_index]
+                donor = route_pools[route_pool_donor_index]
 
                 # now inject onto the end of the recipient gene pool
                 recipient.routes[-1 -
-                                 gene_pool_donor_index] = copy.deepcopy(donor.routes[0])
+                                 route_pool_donor_index] = copy.deepcopy(donor.routes[0])
 
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
-                                 gene_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
+                                 route_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
 
                 print("Leaking and number of iterations is:",
                       len(donor.distances))
@@ -921,38 +946,38 @@ def run_tests(debug=False):
               int(lowest_route_found_so_far))
 
     # We've done all the super iterations so make the videos
-    for gene_pool_index in range(number_of_gene_pools):
+    for route_pool_index in range(number_of_route_pools):
 
-        # set up this gene_pool
-        gene_pool = gene_pools[gene_pool_index]
+        # set up this route_pool
+        route_pool = route_pools[route_pool_index]
 
         # now save the provenance
-        gene_pool.write_provenance(debug=debug)
+        route_pool.write_provenance(debug=debug)
 
         # plot the diversity
-        gene_pool.plot_diversity(debug=debug)
+        route_pool.plot_diversity(debug=debug)
 
         # now make the video
         unique_name = "allSuperIterations"
-        gene_pool.create_video(gene_pool.plots, unique_name, debug=debug)
+        route_pool.create_video(route_pool.plots, unique_name, debug=debug)
 
     # and now make a video stacking all the gene pools on top of each other
     # all the gene pools have the same number of plots
     all_stacked_plots = []
 
     # loop round the plots and then for each one, get the appropriate one for each gene pool
-    number_of_plots = len(gene_pools[0].plots)
+    number_of_plots = len(route_pools[0].plots)
     for plot_index in range(number_of_plots):
 
-        for gene_pool_index in range(number_of_gene_pools):
+        for route_pool_index in range(number_of_route_pools):
 
             # we already have the 1st one stacked
-            if gene_pool_index == 0:
-                stacked_plots = gene_pools[0].plots[plot_index]
+            if route_pool_index == 0:
+                stacked_plots = route_pools[0].plots[plot_index]
 
             else:
                 stacked_plots = np.vstack((
-                    stacked_plots, gene_pools[gene_pool_index].plots[plot_index]))
+                    stacked_plots, route_pools[route_pool_index].plots[plot_index]))
 
         # now append the stacked plots to all the stacked plots
         all_stacked_plots.append(stacked_plots)
@@ -960,7 +985,7 @@ def run_tests(debug=False):
     # now we have all the stacked plots, make a video of that
     # now make the video
     unique_name = "allGenePoolsStacked"
-    gene_pools[0].create_video(all_stacked_plots, unique_name, debug=debug)
+    route_pools[0].create_video(all_stacked_plots, unique_name, debug=debug)
 
     print("Leaving",
           function_name,
