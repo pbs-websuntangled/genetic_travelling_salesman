@@ -854,9 +854,9 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_route_pools = 2
+    number_of_route_pools = 3
     number_of_super_iterations = 3
-    number_of_iterations = 2
+    number_of_iterations = 100
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
@@ -936,7 +936,7 @@ def run_tests(debug=False):
 
                 # update the provenance to show it's leaked
                 recipient.routes[-1 -
-                                 route_pool_donor_index].provenance.append("Leaked from " + donor.name + ", ")
+                                 route_pool_donor_index].provenance.append("Leaked from " + donor.name)
 
                 print("Leaking and number of iterations is:",
                       len(donor.distances))

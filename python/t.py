@@ -2,10 +2,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-test = sys.maxsize
 
-for index in range(0, 10, 2):
-    print(index)
+provenance = ["route_pool_0 number 883", "Survivor", "Child", "Survivor", "Mutation", "Survivor", "Child Mother Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child", "Survivor", "Mutation", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child", "Survivor", "Child", "Survivor",
+              "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Leaked from route_pool_0",  "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor"]
+
+legend = {}
+
+legend["Survivor"] = {}
+legend["Survivor"]["colour"] = "orange"
+
+legend["Child"] = {}
+legend["Child"]["colour"] = "green"
+
+legend["Child Mother Reversed"] = {}
+legend["Child Mother Reversed"]["colour"] = "red"
+
+legend["Child Father Reversed"] = {}
+legend["Child Father Reversed"]["colour"] = "pink"
+
+legend["Leaked from"] = {}
+legend["Leaked from"]["colour"] = "blue"
+
+legend["Mutation"] = {}
+legend["Mutation"]["colour"] = "black"
+
+# start a new figure
+plt.figure()
+
+not_found = "not found =============================="
+
+for iteraration_index, event in enumerate(provenance[1:]):
+
+    match = legend.get(
+        event, not_found)
+
+    if match == not_found:
+        match = legend.get(event[:len("Leaked from")], not_found)
+
+    print(event, match)
 
 
 # start a new figure
