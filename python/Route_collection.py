@@ -855,8 +855,8 @@ def run_tests(debug=False):
     # 25 cities needs 90 iterations
 
     number_of_route_pools = 3
-    number_of_super_iterations = 3
-    number_of_iterations = 100
+    number_of_super_iterations = 10
+    number_of_iterations = 500
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
