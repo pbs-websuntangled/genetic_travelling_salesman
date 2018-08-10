@@ -36,7 +36,11 @@ legend_visualisation_line_space = 50
 legend_visualisation_line_thickness = int(legend_visualisation_line_space / 10)
 legend_visualisation_height = (
     len(legend) + 1) * legend_visualisation_line_space
-legend_visualisation = np.zeros((legend_visualisation_height, 500, 3)) + 255
+golden_ratio = 1.61803398875
+
+legend_visualisation_width = int(legend_visualisation_height * golden_ratio)
+legend_visualisation = np.zeros(
+    (legend_visualisation_height, legend_visualisation_width, 3)) + 255
 legend_visualisation_line_length = legend_visualisation_line_space * 3
 text_font = cv2.FONT_HERSHEY_DUPLEX
 text_colour = (0, 0, 0)

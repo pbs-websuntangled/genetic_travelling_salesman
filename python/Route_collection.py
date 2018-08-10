@@ -617,6 +617,13 @@ class Route_collection:
         # nice and clean
         plt.axis('off')
 
+        # save the file
+        do_this = True
+        if do_this:
+            filename_to_use = "test"
+            plt.savefig(os.path.join('outputNoGit',
+                                     filename_to_use + ".png"))
+
         # turn the figure into a numpy array
         route_figure_as_array = plt_to_numpy_array(plt, scale_factor)
 
@@ -678,6 +685,7 @@ class Route_collection:
             (progress_figure_as_array, route_figure_as_array))
 
         # save to disk if we need to
+        save_images = True
         if save_images == True:
             # save the stacked image
             filename_to_use = "__name_" + self.name +\
@@ -726,6 +734,9 @@ class Route_collection:
 
         # start a figure
         plt.figure()
+
+        plt.xlabel('Any unit of distance you like')
+        plt.ylabel('Any unit of distance you like')
 
         # plot the cities on the chart
         home_city = self.cities[0]
@@ -854,9 +865,9 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_route_pools = 3
-    number_of_super_iterations = 10
-    number_of_iterations = 500
+    number_of_route_pools = 1
+    number_of_super_iterations = 1
+    number_of_iterations = 120
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
