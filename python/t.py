@@ -8,9 +8,6 @@ import time
 import os
 
 
-provenance = ["route_pool_0 number 883", "Survivor", "Child", "Survivor", "Mutation", "Survivor", "Child Mother Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child", "Survivor", "Mutation", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child", "Survivor", "Child", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child", "Survivor", "Child", "Survivor",
-              "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Leaked from route_pool_0",  "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Child Mother Reversed", "Survivor", "Survivor", "Survivor", "Child Father Reversed", "Survivor", "Survivor", "Survivor", "Survivor", "Survivor"]
-
 provenance = return_provenance()
 
 legend = {}
@@ -32,6 +29,46 @@ legend["Leaked from"]["colour"] = get_colour("orange")
 
 legend["Mutation"] = {}
 legend["Mutation"]["colour"] = get_colour("violet")
+
+# create a blank legend image
+
+legend_visualisation_line_space = 50
+legend_visualisation_line_thickness = int(legend_visualisation_line_space / 10)
+legend_visualisation_height = (
+    len(legend) + 1) * legend_visualisation_line_space
+legend_visualisation = np.zeros((legend_visualisation_height, 500, 3)) + 255
+legend_visualisation_line_length = legend_visualisation_line_space * 3
+text_font = cv2.FONT_HERSHEY_DUPLEX
+text_colour = (0, 0, 0)
+
+# loop through each of the legend entries and draw the line with description
+for entry_index, entry in enumerate(legend):
+
+    colour = legend[entry]["colour"]["bgr"]
+    point_1 = (legend_visualisation_line_space, (entry_index + 1)
+               * legend_visualisation_line_space)
+    point_2 = (legend_visualisation_line_length, (entry_index + 1)
+               * legend_visualisation_line_space)
+
+    text_point = point_2[0] + legend_visualisation_line_space, point_2[1]
+    cv2.line(legend_visualisation, point_1, point_2, colour,
+             thickness=legend_visualisation_line_thickness)
+
+    cv2.putText(legend_visualisation, entry,
+                text_point, text_font, 0.5, text_colour)
+
+    print("entry", entry)
+
+    print(legend[entry])
+
+# create a filename
+start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
+filename_to_use = "legend" +\
+    "__ts_" + str(start_time_formatted) +\
+    ".png"
+filename_to_use = os.path.join("outputNoGit", filename_to_use)
+
+cv2.imwrite(filename_to_use, legend_visualisation)
 
 
 # start a new figure
