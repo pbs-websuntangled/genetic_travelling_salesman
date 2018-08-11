@@ -418,7 +418,9 @@ class Route_collection:
             route = np.random.choice(
                 self.number_of_cities, self.number_of_cities, replace=False)
 
-            route = Route(self.cities)
+            # generate a name
+            name = self.name + " number: " + str(route_index)
+            route = Route(self.cities, name)
 
             # tell it where it came from
             route.provenance.append(self.name + " number " + str(route_index))
@@ -618,9 +620,19 @@ class Route_collection:
         plt.axis('off')
 
         # save the file
-        do_this = True
-        if do_this:
+        if (self.iteration == self.number_of_iterations) or (self.iteration == 0):
             filename_to_use = "test"
+            filename_to_use = "__name_" + self.name +\
+                "__cities_" + str(self.number_of_cities) +\
+                "__routes_" + str(self.number_of_routes) + \
+                "__superIterations_" + str(self.number_of_super_iterations) +\
+                "__iterations_" + str(self.number_of_iterations) +\
+                "__distance_" + str(int(self.routes[0].distance)) +\
+                "__ipm_" + str(int(iterations_per_minute)) +\
+                "__type_keyStage" +\
+                "__superIteration_" + str(self.super_iteration_number) +\
+                "__iteration_" + str(self.iteration) +\
+                "__ts_" + str(self.start_time_formatted)
             plt.savefig(os.path.join('outputNoGit',
                                      filename_to_use + ".png"))
 
@@ -715,7 +727,7 @@ class Route_collection:
                   "and the process took",
                   time.time() - start_time)
 
-    def plot_cities(self, debug=False):
+    def plot_cities(self, debug=False, plot_route=False):
 
         if debug:
             # start a timer because it's a long process!!
@@ -750,17 +762,35 @@ class Route_collection:
         # add the title
         plt.title(str(self.number_of_cities) + " City locations")
 
-        # nice and clean
-        # plt.axis('off')
 
-        # Create a meaningful filename
-        filename_to_use = "__name_" + self.name +\
-            "__cities_" + str(self.number_of_cities) +\
-            "__routes_" + str(self.number_of_routes) + \
-            "__superIterations_" + str(self.number_of_super_iterations) +\
-            "__iterations_" + str(self.number_of_iterations) +\
-            "__type_cities" +\
-            "__ts_" + str(self.start_time_formatted)
+        if plot_route:
+
+            # nice and clean
+            plt.axis('off')
+
+            # mark the route on the map
+            plt.plot(x, y, color='k', linestyle='-', linewidth=2)
+
+
+            # Create a meaningful filename
+            filename_to_use = "__name_" + self.name +\
+                "__cities_" + str(self.number_of_cities) +\
+                "__routes_" + str(self.number_of_routes) + \
+                "__superIterations_" + str(self.number_of_super_iterations) +\
+                "__iterations_" + str(self.number_of_iterations) +\
+                "__type_route" +\
+                "__ts_" + str(self.start_time_formatted)
+        
+        else:
+
+            # Create a meaningful filename
+            filename_to_use = "__name_" + self.name +\
+                "__cities_" + str(self.number_of_cities) +\
+                "__routes_" + str(self.number_of_routes) + \
+                "__superIterations_" + str(self.number_of_super_iterations) +\
+                "__iterations_" + str(self.number_of_iterations) +\
+                "__type_cities" +\
+                "__ts_" + str(self.start_time_formatted)
 
         # save the file
         plt.savefig(os.path.join('outputNoGit',
@@ -866,8 +896,8 @@ def run_tests(debug=False):
     # 25 cities needs 90 iterations
 
     number_of_route_pools = 1
-    number_of_super_iterations = 1
-    number_of_iterations = 120
+    number_of_super_iterations = 2
+    number_of_iterations = 3
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
@@ -916,6 +946,9 @@ def run_tests(debug=False):
 
             # pull the route collection out of the gene pool
             route_collection = route_pools[route_pool_index]
+
+            # now set th esuper_iteration_number
+            route_collection.super_iteration_number = super_iteration_index
 
             # now evolve the routes to find a good one
             route_collection.evolve_routes(debug=debug)
@@ -967,6 +1000,9 @@ def run_tests(debug=False):
 
         # plot the diversity
         route_pool.plot_diversity(debug=debug)
+
+        # plot the final best route
+        route_pool.plot_cities(plot_route=True)
 
         # now make the video
         unique_name = "allSuperIterations"
