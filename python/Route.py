@@ -190,7 +190,7 @@ class Route:
         provenance_visualisation_stripe_width = 3
         provenance_visualisation_stripe_white_space_width = 0
         provenance_visualisation_width = provenance_visualisation_stripe_white_space_width + (len(
-            self.provenance) - 1) * (provenance_visualisation_stripe_width + provenance_visualisation_stripe_white_space_width)
+            self.provenance)) * (provenance_visualisation_stripe_width + provenance_visualisation_stripe_white_space_width)
         provenance_visualisation_height = int(
             provenance_visualisation_width * 0.1)
         provenance_visualisation_title_height = legend_visualisation_line_space * 2
@@ -215,7 +215,7 @@ class Route:
 
         # loop round all the evolutiuonary events and create the
         # vertical stripe in the image to reflect that
-        for iteraration_index, event in enumerate(provenance[1:]):
+        for iteraration_index, event in enumerate(self.provenance[1:]):
 
             # find the correct entry in the legend table for this
             # evolution event
@@ -247,9 +247,6 @@ class Route:
                   function_name,
                   "and the process took",
                   time.time() - start_time)
-
-        # and out of here
-        self.distance = distance
 
     def mutate_route(self, number_of_city_pairs_to_swap, debug=False):
 

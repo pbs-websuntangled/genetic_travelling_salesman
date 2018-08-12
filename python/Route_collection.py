@@ -423,7 +423,6 @@ class Route_collection:
             route = Route(self.cities, name)
 
             # tell it where it came from
-            route.provenance.append(self.name + " number " + str(route_index))
             routes.append(route)
 
         # and save them
@@ -762,7 +761,6 @@ class Route_collection:
         # add the title
         plt.title(str(self.number_of_cities) + " City locations")
 
-
         if plot_route:
 
             # nice and clean
@@ -770,7 +768,6 @@ class Route_collection:
 
             # mark the route on the map
             plt.plot(x, y, color='k', linestyle='-', linewidth=2)
-
 
             # Create a meaningful filename
             filename_to_use = "__name_" + self.name +\
@@ -780,7 +777,7 @@ class Route_collection:
                 "__iterations_" + str(self.number_of_iterations) +\
                 "__type_route" +\
                 "__ts_" + str(self.start_time_formatted)
-        
+
         else:
 
             # Create a meaningful filename
@@ -997,6 +994,9 @@ def run_tests(debug=False):
 
         # now save the provenance
         route_pool.write_provenance(debug=debug)
+
+        # now visualise the provenance
+        route_pool.routes[0].visualise_provenance()
 
         # plot the diversity
         route_pool.plot_diversity(debug=debug)
