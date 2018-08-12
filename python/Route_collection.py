@@ -685,8 +685,9 @@ class Route_collection:
 
             plt.plot(plot_this_x, plot_this_y, c="orange")
 
-            plt.annotate('Route \npool \nLeakage', xy=(
-                0.5, 0.5), xytext=(iteration_index, 0.025 * self.distances[0] + self.distances[iteration_index]))
+            if self.super_iteration_number == 1:
+                plt.annotate('Route \npool \nLeakage', xy=(
+                    0.5, 0.5), xytext=(iteration_index, 0.025 * self.distances[0] + self.distances[iteration_index]))
 
         # put a colourful dot on the beginning of the line
         plt.scatter(0, self.distances[-1], c="green", s=200)
@@ -848,8 +849,10 @@ class Route_collection:
             plot_this_y = (0, 0.02 + self.diversity[iteration_index])
             plt.plot(plot_this_x, plot_this_y, c="orange")
 
-            plt.annotate('Route \npool \nLeakage', xy=(
-                0.5, 0.5), xytext=(iteration_index, 0.025 + self.diversity[iteration_index]))
+            # only put the legend on once
+            if iteration_index == self.number_of_iterations:
+                plt.annotate('Route \npool \nLeakage', xy=(
+                    0.5, 0.5), xytext=(iteration_index, 0.025 + self.diversity[iteration_index]))
 
         # add the title
         plt.title("Diversity of routes in:" + self.name)
