@@ -279,6 +279,7 @@ class Route_collection:
         # kill if it's less
         # by not copying it over to new list
         new_routes = []
+        distances_to_check_for_diversity = []
         for route_index, route in enumerate(self.routes):
 
             # is it fit enough?
@@ -286,9 +287,14 @@ class Route_collection:
             if danger <= route.fitness:
 
                 # increase the diversity by refusing multiple copies of the same route
-                if self.routes[route_index] not in new_routes:
+                if self.routes[route_index].distance not in distances_to_check_for_diversity:
+
                     # this route survives!!
                     new_routes.append(self.routes[route_index])
+
+                    # add this distance to diversity checking store of distances
+                    distances_to_check_for_diversity.append(
+                        self.routes[route_index].distance)
 
                     # update the provenenace
                     new_routes[-1].provenance.append("Survivor")
@@ -892,9 +898,9 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_route_pools = 1
-    number_of_super_iterations = 2
-    number_of_iterations = 3
+    number_of_route_pools = 4
+    number_of_super_iterations = 12
+    number_of_iterations = 100
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)

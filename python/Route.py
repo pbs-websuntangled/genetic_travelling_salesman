@@ -145,6 +145,7 @@ class Route:
             legend_visualisation_line_space / 10)
         legend_visualisation_height = (
             len(legend) + 1) * legend_visualisation_line_space
+        legend_visualisation_height = legend_visualisation_height
         golden_ratio = 1.61803398875
 
         legend_visualisation_width = int(
@@ -173,10 +174,6 @@ class Route:
             cv2.putText(legend_visualisation, entry,
                         text_point, text_font, 1, text_colour)
 
-            print("entry", entry)
-
-            print(legend[entry])
-
         # create a filename
         start_time_formatted = time.strftime("%Y%m%d-%H%M%S")
         filename_to_use = "legend" +\
@@ -191,8 +188,15 @@ class Route:
         provenance_visualisation_stripe_white_space_width = 0
         provenance_visualisation_width = provenance_visualisation_stripe_white_space_width + (len(
             self.provenance)) * (provenance_visualisation_stripe_width + provenance_visualisation_stripe_white_space_width)
-        provenance_visualisation_height = int(
-            provenance_visualisation_width * 0.1)
+        provenance_visualisation_width = max(
+            provenance_visualisation_width, 2000)
+
+        # if we have a short provevance ans so using the default width,
+        # use a sensible strip witdth to fill up the image
+        provenance_visualisation_stripe_width = max(provenance_visualisation_stripe_width, int(provenance_visualisation_width / (len(
+            self.provenance))))
+
+        provenance_visualisation_height = 200
         provenance_visualisation_title_height = legend_visualisation_line_space * 2
         channels = 3
         provenance_visualisation = np.zeros((
@@ -203,8 +207,8 @@ class Route:
         # add the title to the white bar above the stripes
         text_point = (legend_visualisation_line_space,
                       int(1.2 * legend_visualisation_line_space))
-        title_text_scale_factor = 3
-        cv2.putText(provenance_visualisation, "Ancestry of shortest route: " + self.name,
+        title_text_scale_factor = 2.5
+        cv2.putText(provenance_visualisation, "Ancestry: " + self.name,
                     text_point, text_font, title_text_scale_factor, text_colour)
 
         # fill in the duplex spindly font
@@ -215,7 +219,7 @@ class Route:
 
         # loop round all the evolutiuonary events and create the
         # vertical stripe in the image to reflect that
-        for iteraration_index, event in enumerate(self.provenance[1:]):
+        for iteraration_index, event in enumerate(self.provenance):
 
             # find the correct entry in the legend table for this
             # evolution event
