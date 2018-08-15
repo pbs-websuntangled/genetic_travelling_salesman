@@ -685,7 +685,7 @@ class Route_collection:
 
             plt.plot(plot_this_x, plot_this_y, c="orange")
 
-            if self.super_iteration_number == 1:
+            if iteration_index == self.number_of_iterations:
                 plt.annotate('Route \npool \nLeakage', xy=(
                     0.5, 0.5), xytext=(iteration_index, 0.025 * self.distances[0] + self.distances[iteration_index]))
 
@@ -769,6 +769,13 @@ class Route_collection:
         plt.title(str(self.number_of_cities) + " City locations")
 
         if plot_route:
+            # create the x and y coordinates of the cities
+            # for plotting the current best route
+            x = []
+            y = []
+            for city_index in self.routes[0].route:
+                x.append(self.cities[city_index][0])
+                y.append(self.cities[city_index][1])
 
             # nice and clean
             plt.axis('off')
@@ -901,9 +908,9 @@ def run_tests(debug=False):
 
     # 25 cities needs 90 iterations
 
-    number_of_route_pools = 4
-    number_of_super_iterations = 12
-    number_of_iterations = 100
+    number_of_route_pools = 8
+    number_of_super_iterations = 3
+    number_of_iterations = 800
 
     # print out the key variables
     print("number_of_cities =", number_of_cities)
